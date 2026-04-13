@@ -1,0 +1,58 @@
+<UserControl x:Class="Nalbur.Wpf.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <WrapPanel Grid.Row="0" Margin="0,0,0,20">
+            <!-- Overdue Installments Card -->
+            <materialDesign:Card Width="200" Height="120" Margin="0,0,16,16" Background="#FFF44336">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="AlertCircle" HorizontalAlignment="Center" Width="32" Height="32" Foreground="White" />
+                    <TextBlock Text="{Binding OverdueCount}" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" />
+                    <TextBlock Text="Gecikmiş Taksitler" Foreground="White" HorizontalAlignment="Center" />
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- Low Stock Card -->
+            <materialDesign:Card Width="200" Height="120" Margin="0,0,16,16" Background="#FFFF9800">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Warehouse" HorizontalAlignment="Center" Width="32" Height="32" Foreground="White" />
+                    <TextBlock Text="{Binding LowStockCount}" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" />
+                    <TextBlock Text="Düşük Stok" Foreground="White" HorizontalAlignment="Center" />
+                </StackPanel>
+            </materialDesign:Card>
+        </WrapPanel>
+
+        <materialDesign:Card Grid.Row="1" Padding="16">
+            <StackPanel>
+                <TextBlock Text="Bugün Ödenecek Taksitler" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                <DataGrid ItemsSource="{Binding TodayDueInstallments}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="300">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Müşteri" Binding="{Binding InstallmentPlan.Sale.Customer.Name}" Width="*" />
+                        <DataGridTextColumn Header="Miktar" Binding="{Binding Amount, StringFormat=C2}" Width="100" />
+                        <DataGridTextColumn Header="Vade Tarihi" Binding="{Binding DueDate, StringFormat=dd.MM.yyyy}" Width="120" />
+                        <DataGridTemplateColumn Header="Durum" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <materialDesign:Chip Content="{Binding Status}" Background="#FFBBDEFB" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <TextBlock Text="Bugün için bekleyen taksit bulunmamaktadır." 
+                           Visibility="{Binding TodayDueInstallments.Count, Converter={StaticResource InverseBooleanToVisibilityConverter}}" 
+                           Margin="0,20,0,0" FontStyle="Italic" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

@@ -1,0 +1,55 @@
+<UserControl x:Class="Nalbur.Wpf.Views.ProductListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="300" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Product List -->
+        <materialDesign:Card Grid.Column="0" Margin="0,0,16,0" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Ürün Listesi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Kod" Binding="{Binding Code}" Width="80" />
+                        <DataGridTextColumn Header="Barkod" Binding="{Binding Barcode}" Width="100" />
+                        <DataGridTextColumn Header="İsim" Binding="{Binding Name}" Width="*" />
+                        <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="100" />
+                        <DataGridTextColumn Header="Stok" Binding="{Binding CurrentStock}" Width="60" />
+                        <DataGridTextColumn Header="Satış Fiyatı" Binding="{Binding SalePrice, StringFormat=C2}" Width="100" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Add/Edit Form -->
+        <materialDesign:Card Grid.Column="1" Padding="16">
+            <StackPanel>
+                <TextBlock Text="Yeni Ürün Ekle" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                
+                <TextBox Text="{Binding NewProduct.Code}" materialDesign:HintAssist.Hint="Ürün Kodu" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Barcode}" materialDesign:HintAssist.Hint="Barkod" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Name}" materialDesign:HintAssist.Hint="Ürün Adı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Category}" materialDesign:HintAssist.Hint="Kategori" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.CostPrice}" materialDesign:HintAssist.Hint="Alış Fiyatı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.SalePrice}" materialDesign:HintAssist.Hint="Satış Fiyatı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.CurrentStock}" materialDesign:HintAssist.Hint="Mevcut Stok" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.MinimumStock}" materialDesign:HintAssist.Hint="Min. Stok" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+
+                <Button Command="{Binding SaveProductCommand}" Content="KAYDET" Margin="0,20,0,0" Style="{StaticResource MaterialDesignFilledButton}" />
+            </StackPanel>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>
