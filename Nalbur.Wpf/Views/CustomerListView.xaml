@@ -21,7 +21,9 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="Müşteri Listesi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
                 
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}" 
+                          SelectedItem="{Binding SelectedCustomer}"
+                          AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="100" />
                         <DataGridTextColumn Header="Soyad / Firma" Binding="{Binding SurnameCompany}" Width="*" />
@@ -35,15 +37,67 @@
         <!-- Add Form -->
         <materialDesign:Card Grid.Column="1" Padding="16">
             <StackPanel>
-                <TextBlock Text="Yeni Müşteri Ekle" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                <TextBlock FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Yeni Müşteri Ekle" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                    <Setter Property="Text" Value="Müşteriyi Düzenle" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 
-                <TextBox Text="{Binding NewCustomer.Name}" materialDesign:HintAssist.Hint="Ad" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewCustomer.SurnameCompany}" materialDesign:HintAssist.Hint="Soyad / Firma Adı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewCustomer.Phone}" materialDesign:HintAssist.Hint="Telefon" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewCustomer.Email}" materialDesign:HintAssist.Hint="Email" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewCustomer.Address}" materialDesign:HintAssist.Hint="Adres" AcceptsReturn="True" Height="80" VerticalAlignment="Top" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewCustomer.Name}" materialDesign:HintAssist.Hint="Ad" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewCustomer.SurnameCompany}" materialDesign:HintAssist.Hint="Soyad / Firma Adı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewCustomer.Phone}" materialDesign:HintAssist.Hint="Telefon" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewCustomer.Email}" materialDesign:HintAssist.Hint="Email" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewCustomer.Address}" materialDesign:HintAssist.Hint="Adres" materialDesign:HintAssist.IsFloating="True" AcceptsReturn="True" Height="80" VerticalAlignment="Top" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
 
-                <Button Command="{Binding SaveCustomerCommand}" Content="KAYDET" Margin="0,20,0,0" Style="{StaticResource MaterialDesignRaisedButton}" />
+                <Grid ShowGridLines="False" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.ColumnSpan="2" Command="{Binding SaveCustomerCommand}" Margin="0,0,0,8">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Content" Value="KAYDET" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                        <Setter Property="Content" Value="GÜNCELLE" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Grid.Row="1" Grid.Column="0" Command="{Binding DeleteCustomerCommand}" 
+                            Content="SİL" 
+                            Margin="0,0,4,0" BorderBrush="Red" Foreground="Red">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding ClearFormCommand}" 
+                            Content="TEMİZLE" Style="{StaticResource MaterialDesignFlatButton}" 
+                            Margin="4,0,0,0" />
+                </Grid>
             </StackPanel>
         </materialDesign:Card>
     </Grid>

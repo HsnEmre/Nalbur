@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:enums="clr-namespace:Nalbur.Domain.Enums;assembly=Nalbur.Domain"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
@@ -12,7 +13,18 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Taksit Takip Sistemi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Taksit Takip Sistemi" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Command="{Binding RefreshCommand}" 
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Padding="0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="YENİLE" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </Grid>
 
         <materialDesign:Card Grid.Row="1" Padding="16">
             <Grid>
@@ -23,19 +35,43 @@
 
                 <DataGrid ItemsSource="{Binding Installments}" 
                           SelectedItem="{Binding SelectedInstallment}"
-                          AutoGenerateColumns="False" IsReadOnly="True">
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Müşteri" Binding="{Binding InstallmentPlan.Sale.Customer.Name}" Width="*" />
-                        <DataGridTextColumn Header="Miktar" Binding="{Binding Amount, StringFormat=C2}" Width="100" />
-                        <DataGridTextColumn Header="Vade Tarihi" Binding="{Binding DueDate, StringFormat=dd.MM.yyyy}" Width="120" />
-                        <DataGridTextColumn Header="Durum" Binding="{Binding Status}" Width="100" />
-                        <DataGridTextColumn Header="Ödeme Tarihi" Binding="{Binding PaymentDate, StringFormat=dd.MM.yyyy}" Width="120" />
+                        <DataGridTextColumn Header="Taksit Tutarı" Binding="{Binding Amount, StringFormat=C2}" Width="100" />
+                        <DataGridTextColumn Header="Ödenen" Binding="{Binding PaidAmount, StringFormat=C2}" Width="90" Foreground="Green" />
+                        <DataGridTextColumn Header="Kalan" Binding="{Binding RemainingAmount, StringFormat=C2}" Width="90" Foreground="OrangeRed" />
+                        <DataGridTextColumn Header="Plan Durum" Binding="{Binding InstallmentPlan.ProgressDisplay}" Width="100" />
+                        <DataGridTextColumn Header="Vade Tarihi" Binding="{Binding DueDate, StringFormat=dd.MM.yyyy}" Width="110" />
+                        <DataGridTextColumn Header="Taksit Durum" Binding="{Binding Status}" Width="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:InstallmentStatus.Paid}">
+                                            <Setter Property="Foreground" Value="Green" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:InstallmentStatus.Overdue}">
+                                            <Setter Property="Foreground" Value="Red" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Son Ödeme" Binding="{Binding PaymentDate, StringFormat=dd.MM.yyyy}" Width="110" />
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <Button Grid.Row="1" Command="{Binding PayInstallmentCommand}" 
-                        Content="ÖDEME AL" HorizontalAlignment="Right" Margin="0,16,0,0"
-                        Style="{StaticResource MaterialDesignRaisedButton}" />
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,16,0,0">
+                    <TextBox Text="{Binding PaymentAmount}" 
+                             materialDesign:HintAssist.Hint="Ödeme Tutarı" 
+                             Width="120" Margin="0,0,16,0"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                    <Button Command="{Binding PayInstallmentCommand}" 
+                            Content="ÖDEME AL" />
+                </StackPanel>
             </Grid>
         </materialDesign:Card>
     </Grid>

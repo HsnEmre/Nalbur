@@ -13,8 +13,9 @@ public interface IInstallmentService
 {
     Task<List<Installment>> GetOverdueInstallmentsAsync();
     Task<List<Installment>> GetUpcomingInstallmentsAsync(int days);
+    Task<List<Installment>> GetActiveInstallmentsAsync();
     Task<List<Installment>> GetInstallmentsByCustomerAsync(int customerId);
-    Task MarkAsPaidAsync(int installmentId);
+    Task ProcessPaymentAsync(int installmentId, decimal amount);
 }
 
 public interface IReminderService

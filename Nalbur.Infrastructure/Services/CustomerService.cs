@@ -14,9 +14,9 @@ public class CustomerService : ICustomerService
         _context = context;
     }
 
-    public async Task<List<Customer>> GetAllAsync() => await _context.Customers.ToListAsync();
+    public async Task<List<Customer>> GetAllAsync() => await _context.Customers.AsNoTracking().ToListAsync();
 
-    public async Task<Customer?> GetByIdAsync(int id) => await _context.Customers.FindAsync(id);
+    public async Task<Customer?> GetByIdAsync(int id) => await _context.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task AddAsync(Customer customer)
     {
@@ -26,8 +26,17 @@ public class CustomerService : ICustomerService
 
     public async Task UpdateAsync(Customer customer)
     {
-        _context.Customers.Update(customer);
-        await _context.SaveChangesAsync();
+        var existingCustomer = await _context.Customers.FindAsync(customer.Id);
+        if (existingCustomer != null)
+        {
+            existingCustomer.Name = customer.Name;
+            existingCustomer.SurnameCompany = customer.SurnameCompany;
+            existingCustomer.Phone = customer.Phone;
+            existingCustomer.Email = customer.Email;
+            existingCustomer.Address = customer.Address;
+            
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task DeleteAsync(int id)

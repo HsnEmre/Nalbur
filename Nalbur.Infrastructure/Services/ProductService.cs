@@ -14,9 +14,9 @@ public class ProductService : IProductService
         _context = context;
     }
 
-    public async Task<List<Product>> GetAllAsync() => await _context.Products.ToListAsync();
+    public async Task<List<Product>> GetAllAsync() => await _context.Products.AsNoTracking().ToListAsync();
 
-    public async Task<Product?> GetByIdAsync(int id) => await _context.Products.FindAsync(id);
+    public async Task<Product?> GetByIdAsync(int id) => await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
 
     public async Task AddAsync(Product product)
     {
@@ -26,8 +26,21 @@ public class ProductService : IProductService
 
     public async Task UpdateAsync(Product product)
     {
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync();
+        var existingProduct = await _context.Products.FindAsync(product.Id);
+        if (existingProduct != null)
+        {
+            existingProduct.Code = product.Code;
+            existingProduct.Barcode = product.Barcode;
+            existingProduct.Name = product.Name;
+            existingProduct.Category = product.Category;
+            existingProduct.CostPrice = product.CostPrice;
+            existingProduct.SalePrice = product.SalePrice;
+            existingProduct.CurrentStock = product.CurrentStock;
+            existingProduct.MinimumStock = product.MinimumStock;
+            existingProduct.IsActive = product.IsActive;
+            
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task DeleteAsync(int id)

@@ -56,8 +56,16 @@
 
                 <Separator Grid.Row="2" Margin="0,16" />
 
-                <TextBlock Grid.Row="3" Text="Sepet" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" VerticalAlignment="Top"/>
-                <DataGrid Grid.Row="3" ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" Margin="0,30,0,0">
+                <Grid Grid.Row="3" Margin="0,0,0,16">
+                    <TextBlock Text="Sepet" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Command="{Binding ClearCartCommand}" 
+                            Content="SEPETİ TEMİZLE" 
+                            Style="{StaticResource MaterialDesignFlatButton}" 
+                            HorizontalAlignment="Right" 
+                            Foreground="Red" 
+                            FontSize="12" />
+                </Grid>
+                <DataGrid Grid.Row="3" ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" Margin="0,40,0,0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Ürün" Binding="{Binding Product.Name}" Width="*" />
                         <DataGridTextColumn Header="Fiyat" Binding="{Binding UnitPrice, StringFormat=C2}" Width="80" />
@@ -85,14 +93,22 @@
                 <TextBlock Text="Ödeme Paneli" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
 
                 <!-- Customer Selection -->
-                <ComboBox ItemsSource="{Binding Customers}"
+                <ComboBox ItemsSource="{Binding FilteredCustomers}"
                           SelectedItem="{Binding SelectedCustomer}"
-                          materialDesign:HintAssist.Hint="Müşteri Seçin"
+                          Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
+                          IsEditable="True"
+                          materialDesign:TextFieldAssist.HasClearButton="True"
+                          materialDesign:HintAssist.Hint="Müşteri Ara (Ad, Telefon...)"
+                          materialDesign:HintAssist.IsFloating="True"
                           Style="{StaticResource MaterialDesignComboBox}"
                           Margin="0,0,0,16">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                <TextBlock Text=" - " />
+                                <TextBlock Text="{Binding SurnameCompany}" />
+                            </StackPanel>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
@@ -107,8 +123,8 @@
 
                 <!-- Installment Details -->
                 <StackPanel Visibility="{Binding SelectedSaleType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:SaleType.Installment}}">
-                    <TextBox Text="{Binding InstallmentCount}" materialDesign:HintAssist.Hint="Taksit Sayısı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                    <TextBox Text="{Binding DownPayment}" materialDesign:HintAssist.Hint="Peşinat" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                    <TextBox Text="{Binding InstallmentCount}" materialDesign:HintAssist.Hint="Taksit Sayısı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                    <TextBox Text="{Binding DownPayment}" materialDesign:HintAssist.Hint="Peşinat" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
                 </StackPanel>
 
                 <Separator Margin="0,16" />
@@ -118,7 +134,7 @@
                     <TextBlock Text="{Binding TotalAmount, StringFormat=C2}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
                 </StackPanel>
 
-                <Button Command="{Binding ProcessSaleCommand}" Content="SATIŞI TAMAMLA" Height="60" Margin="0,40,0,0" Style="{StaticResource MaterialDesignRaisedButton}" FontSize="18" />
+                <Button Command="{Binding ProcessSaleCommand}" Content="SATIŞI TAMAMLA" Height="60" Margin="0,40,0,0" FontSize="18" />
             </StackPanel>
         </materialDesign:Card>
     </Grid>

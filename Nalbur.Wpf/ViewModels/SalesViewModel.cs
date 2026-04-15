@@ -20,6 +20,22 @@ public partial class SalesViewModel : ViewModelBase
     private ObservableCollection<Customer> _customers = new();
 
     [ObservableProperty]
+    private ObservableCollection<Customer> _filteredCustomers = new();
+
+    private string _customerSearchText = string.Empty;
+    public string CustomerSearchText
+    {
+        get => _customerSearchText;
+        set
+        {
+            if (SetProperty(ref _customerSearchText, value))
+            {
+                FilterCustomers();
+            }
+        }
+    }
+
+    [ObservableProperty]
     private ObservableCollection<SaleItem> _cartItems = new();
 
     [ObservableProperty]
@@ -43,16 +59,18 @@ public partial class SalesViewModel : ViewModelBase
         _productService = productService;
         _customerService = customerService;
 
-        AddToCartCommand = new RelayCommand<Product>(AddToCart);
-        RemoveFromCartCommand = new RelayCommand<SaleItem>(RemoveFromCart);
+        AddToCartCommand = new RelayCommand<object>(AddToCart);
+        RemoveFromCartCommand = new RelayCommand<object>(RemoveFromCart);
         ProcessSaleCommand = new AsyncRelayCommand(ProcessSaleAsync);
+        ClearCartCommand = new RelayCommand(ClearCart);
 
         LoadDataAsync();
     }
 
-    public IRelayCommand<Product> AddToCartCommand { get; }
-    public IRelayCommand<SaleItem> RemoveFromCartCommand { get; }
+    public IRelayCommand<object> AddToCartCommand { get; }
+    public IRelayCommand<object> RemoveFromCartCommand { get; }
     public IAsyncRelayCommand ProcessSaleCommand { get; }
+    public IRelayCommand ClearCartCommand { get; }
 
     private async void LoadDataAsync()
     {
@@ -61,11 +79,40 @@ public partial class SalesViewModel : ViewModelBase
 
         var customers = await _customerService.GetAllAsync();
         Customers = new ObservableCollection<Customer>(customers);
+        FilteredCustomers = new ObservableCollection<Customer>(customers);
     }
 
-    private void AddToCart(Product? product)
+    private void ClearCart()
     {
-        if (product == null) return;
+        CartItems.Clear();
+        CalculateTotal();
+        SelectedCustomer = null;
+        CustomerSearchText = string.Empty;
+        SelectedSaleType = SaleType.Cash;
+        DownPayment = 0;
+        InstallmentCount = 3;
+    }
+
+    private void FilterCustomers()
+    {
+        if (string.IsNullOrWhiteSpace(CustomerSearchText))
+        {
+            FilteredCustomers = new ObservableCollection<Customer>(Customers);
+            return;
+        }
+
+        var lowerSearch = CustomerSearchText.ToLower();
+        var filtered = Customers.Where(c => 
+            c.Name.ToLower().Contains(lowerSearch) || 
+            (c.SurnameCompany?.ToLower().Contains(lowerSearch) ?? false) ||
+            (c.Phone?.Contains(lowerSearch) ?? false));
+            
+        FilteredCustomers = new ObservableCollection<Customer>(filtered);
+    }
+
+    private void AddToCart(object? parameter)
+    {
+        if (parameter is not Product product) return;
 
         var existingItem = CartItems.FirstOrDefault(i => i.ProductId == product.Id);
         if (existingItem != null)
@@ -87,9 +134,9 @@ public partial class SalesViewModel : ViewModelBase
         CalculateTotal();
     }
 
-    private void RemoveFromCart(SaleItem? item)
+    private void RemoveFromCart(object? parameter)
     {
-        if (item != null)
+        if (parameter is SaleItem item)
         {
             CartItems.Remove(item);
             CalculateTotal();

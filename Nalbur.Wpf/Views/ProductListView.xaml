@@ -21,7 +21,9 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="Ürün Listesi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
                 
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" 
+                          SelectedItem="{Binding SelectedProduct}"
+                          AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Kod" Binding="{Binding Code}" Width="80" />
                         <DataGridTextColumn Header="Barkod" Binding="{Binding Barcode}" Width="100" />
@@ -37,18 +39,70 @@
         <!-- Add/Edit Form -->
         <materialDesign:Card Grid.Column="1" Padding="16">
             <StackPanel>
-                <TextBlock Text="Yeni Ürün Ekle" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                <TextBlock FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Yeni Ürün Ekle" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                    <Setter Property="Text" Value="Ürünü Düzenle" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 
-                <TextBox Text="{Binding NewProduct.Code}" materialDesign:HintAssist.Hint="Ürün Kodu" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.Barcode}" materialDesign:HintAssist.Hint="Barkod" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.Name}" materialDesign:HintAssist.Hint="Ürün Adı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.Category}" materialDesign:HintAssist.Hint="Kategori" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.CostPrice}" materialDesign:HintAssist.Hint="Alış Fiyatı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.SalePrice}" materialDesign:HintAssist.Hint="Satış Fiyatı" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.CurrentStock}" materialDesign:HintAssist.Hint="Mevcut Stok" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                <TextBox Text="{Binding NewProduct.MinimumStock}" materialDesign:HintAssist.Hint="Min. Stok" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Code}" materialDesign:HintAssist.Hint="Ürün Kodu" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Barcode}" materialDesign:HintAssist.Hint="Barkod" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Name}" materialDesign:HintAssist.Hint="Ürün Adı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.Category}" materialDesign:HintAssist.Hint="Kategori" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.CostPrice}" materialDesign:HintAssist.Hint="Alış Fiyatı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.SalePrice}" materialDesign:HintAssist.Hint="Satış Fiyatı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.CurrentStock}" materialDesign:HintAssist.Hint="Mevcut Stok" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                <TextBox Text="{Binding NewProduct.MinimumStock}" materialDesign:HintAssist.Hint="Min. Stok" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
 
-                <Button Command="{Binding SaveProductCommand}" Content="KAYDET" Margin="0,20,0,0" Style="{StaticResource MaterialDesignFilledButton}" />
+                <Grid ShowGridLines="False" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.ColumnSpan="2" Command="{Binding SaveProductCommand}" Margin="0,0,0,8">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Content" Value="KAYDET" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                        <Setter Property="Content" Value="GÜNCELLE" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Grid.Row="1" Grid.Column="0" Command="{Binding DeleteProductCommand}" 
+                            Content="SİL" 
+                            Margin="0,0,4,0" BorderBrush="Red" Foreground="Red">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding ClearFormCommand}" 
+                            Content="TEMİZLE" Style="{StaticResource MaterialDesignFlatButton}" 
+                            Margin="4,0,0,0" />
+                </Grid>
             </StackPanel>
         </materialDesign:Card>
     </Grid>

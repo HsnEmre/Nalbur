@@ -15,6 +15,7 @@ public class NalburDbContext : DbContext
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
     public DbSet<InstallmentPlan> InstallmentPlans => Set<InstallmentPlan>();
     public DbSet<Installment> Installments => Set<Installment>();
+    public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -72,10 +73,23 @@ public class NalburDbContext : DbContext
         // Installment Configuration
         modelBuilder.Entity<Installment>()
             .Property(i => i.Amount).HasPrecision(18, 2);
+        
+        modelBuilder.Entity<Installment>()
+            .Property(i => i.PaidAmount).HasPrecision(18, 2)
+            .HasDefaultValue(0);
 
         modelBuilder.Entity<Installment>()
             .HasOne(i => i.InstallmentPlan)
             .WithMany(ip => ip.Installments)
             .HasForeignKey(i => i.InstallmentPlanId);
+
+        // Payment Configuration
+        modelBuilder.Entity<Payment>()
+            .Property(p => p.Amount).HasPrecision(18, 2);
+
+        modelBuilder.Entity<Payment>()
+            .HasOne(p => p.Installment)
+            .WithMany(i => i.Payments)
+            .HasForeignKey(p => p.InstallmentId);
     }
 }

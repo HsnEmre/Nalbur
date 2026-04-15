@@ -17,32 +17,44 @@ public partial class InstallmentViewModel : ViewModelBase
     [ObservableProperty]
     private Installment? _selectedInstallment;
 
+    [ObservableProperty]
+    private decimal _paymentAmount;
+
+    partial void OnSelectedInstallmentChanged(Installment? value)
+    {
+        if (value != null)
+        {
+            PaymentAmount = value.RemainingAmount;
+        }
+    }
+
     public InstallmentViewModel(IInstallmentService installmentService)
     {
         _installmentService = installmentService;
-        LoadInstallmentsCommand = new AsyncRelayCommand(LoadInstallmentsAsync);
+        RefreshCommand = new AsyncRelayCommand(LoadInstallmentsAsync);
         PayInstallmentCommand = new AsyncRelayCommand(PayInstallmentAsync);
-
-        LoadInstallmentsCommand.Execute(null);
+        
+        RefreshCommand.Execute(null);
     }
 
-    public IAsyncRelayCommand LoadInstallmentsCommand { get; }
+    public IAsyncRelayCommand RefreshCommand { get; }
     public IAsyncRelayCommand PayInstallmentCommand { get; }
 
     private async Task LoadInstallmentsAsync()
     {
-        var due = await _installmentService.GetUpcomingInstallmentsAsync(30);
-        var overdue = await _installmentService.GetOverdueInstallmentsAsync();
-        
-        var all = due.Concat(overdue).OrderBy(i => i.DueDate).ToList();
-        Installments = new ObservableCollection<Installment>(all);
+        var allActive = await _installmentService.GetActiveInstallmentsAsync();
+        Installments = new ObservableCollection<Installment>(allActive);
     }
 
     private async Task PayInstallmentAsync()
     {
-        if (SelectedInstallment == null) return;
+        if (SelectedInstallment == null || PaymentAmount <= 0) return;
 
-        await _installmentService.MarkAsPaidAsync(SelectedInstallment.Id);
+        await _installmentService.ProcessPaymentAsync(SelectedInstallment.Id, PaymentAmount);
         await LoadInstallmentsAsync();
+        
+        // Clear selection to reset
+        SelectedInstallment = null;
+        PaymentAmount = 0;
     }
 }

@@ -36,6 +36,25 @@ public class InstallmentService : IInstallmentService
             .ToListAsync();
     }
 
+    public async Task<List<Installment>> GetActiveInstallmentsAsync()
+    {
+        // Get IDs of plans that have at least one unpaid installment
+        var activePlanIds = await _context.Installments
+            .Where(i => i.Status != InstallmentStatus.Paid)
+            .Select(i => i.InstallmentPlanId)
+            .Distinct()
+            .ToListAsync();
+
+        // Return all installments for those active plans (including PAID ones for history/context)
+        return await _context.Installments
+            .Include(i => i.InstallmentPlan)
+                .ThenInclude(ip => ip.Sale)
+                    .ThenInclude(s => s.Customer)
+            .Where(i => activePlanIds.Contains(i.InstallmentPlanId))
+            .OrderBy(i => i.DueDate)
+            .ToListAsync();
+    }
+
     public async Task<List<Installment>> GetInstallmentsByCustomerAsync(int customerId)
     {
         return await _context.Installments
@@ -45,13 +64,55 @@ public class InstallmentService : IInstallmentService
             .ToListAsync();
     }
 
-    public async Task MarkAsPaidAsync(int installmentId)
+    public async Task ProcessPaymentAsync(int installmentId, decimal amount)
     {
-        var installment = await _context.Installments.FindAsync(installmentId);
+        if (amount <= 0) return;
+
+        var installment = await _context.Installments
+            .Include(i => i.Payments)
+            .FirstOrDefaultAsync(i => i.Id == installmentId);
+
         if (installment != null)
         {
-            installment.Status = InstallmentStatus.Paid;
-            installment.PaymentDate = DateTime.Now;
+            // Do not allow overpayment to corrupt state - cap it at remaining amount
+            var remaining = installment.Amount - installment.PaidAmount;
+            if (amount > remaining)
+            {
+                amount = remaining;
+            }
+
+            if (amount <= 0) return;
+
+            // 1. Create Payment Record
+            var payment = new Payment
+            {
+                InstallmentId = installmentId,
+                Amount = amount,
+                PaymentDate = DateTime.Now
+            };
+            await _context.Payments.AddAsync(payment);
+
+            // 2. Update Installment
+            installment.PaidAmount += amount;
+            installment.PaymentDate = payment.PaymentDate;
+
+            // Only mark as Paid when fully completed
+            if (installment.PaidAmount >= installment.Amount)
+            {
+                installment.Status = InstallmentStatus.Paid;
+            }
+            else
+            {
+                // Ensure it's not marked as Paid if only partially paid
+                // (It could be Overdue or Pending depending on date, but definitely not Paid)
+                if (installment.Status == InstallmentStatus.Paid)
+                {
+                    installment.Status = installment.DueDate < DateTime.Today 
+                        ? InstallmentStatus.Overdue 
+                        : InstallmentStatus.Pending;
+                }
+            }
+
             await _context.SaveChangesAsync();
         }
     }

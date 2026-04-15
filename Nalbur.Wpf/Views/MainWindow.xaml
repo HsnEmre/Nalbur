@@ -41,35 +41,35 @@
             <StackPanel Margin="10">
                 <TextBlock Text="NALBUR" FontSize="24" FontWeight="Bold" Foreground="White" Margin="10,20,10,40" HorizontalAlignment="Center" />
                 
-                <Button Command="{Binding NavigateToDashboardCommand}" Style="{StaticResource MaterialDesignTextButton}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                <Button Command="{Binding NavigateToDashboardCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ViewDashboard" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding NavigateToProductsCommand}" Style="{StaticResource MaterialDesignTextButton}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                <Button Command="{Binding NavigateToProductsCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="PackageVariant" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Ürünler" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding NavigateToCustomersCommand}" Style="{StaticResource MaterialDesignTextButton}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                <Button Command="{Binding NavigateToCustomersCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AccountGroup" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Müşteriler" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding NavigateToSalesCommand}" Style="{StaticResource MaterialDesignTextButton}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                <Button Command="{Binding NavigateToSalesCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ShoppingCart" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Satış Yap" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding NavigateToInstallmentsCommand}" Style="{StaticResource MaterialDesignTextButton}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                <Button Command="{Binding NavigateToInstallmentsCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CalendarClock" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Taksit Takip" VerticalAlignment="Center"/>
