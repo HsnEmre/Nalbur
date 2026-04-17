@@ -22,7 +22,33 @@ public class SaleService : ISaleService
             .Include(s => s.SaleItems)
                 .ThenInclude(si => si.Product)
             .Include(s => s.InstallmentPlan)
+            .OrderByDescending(s => s.SaleDate)
             .ToListAsync();
+    }
+
+    public async Task<List<Sale>> GetFilteredSalesAsync(DateTime? startDate, DateTime? endDate, int? customerId, SaleType? saleType)
+    {
+        var query = _context.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+            .Include(s => s.InstallmentPlan)
+                .ThenInclude(ip => ip != null ? ip.Installments : null)
+            .AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(s => s.SaleDate >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(s => s.SaleDate <= endDate.Value);
+
+        if (customerId.HasValue)
+            query = query.Where(s => s.CustomerId == customerId.Value);
+
+        if (saleType.HasValue)
+            query = query.Where(s => s.SaleType == saleType.Value);
+
+        return await query.OrderByDescending(s => s.SaleDate).ToListAsync();
     }
 
     public async Task<Sale?> GetSaleByIdAsync(int id)
@@ -41,30 +67,59 @@ public class SaleService : ISaleService
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            // 1. Add Sale
-            await _context.Sales.AddAsync(sale);
-            
-            // 2. Update Stocks
-            foreach (var item in sale.SaleItems)
+            var newSale = new Sale
+            {
+                SaleDate = sale.SaleDate == default ? DateTime.Now : sale.SaleDate,
+                CustomerId = sale.CustomerId,
+                TotalAmount = sale.TotalAmount,
+                SaleType = sale.SaleType,
+                SaleItems = sale.SaleItems.Select(x => new SaleItem
+                {
+                    ProductId = x.ProductId,
+                    Quantity = x.Quantity,
+                    UnitPrice = x.UnitPrice,
+                    TotalPrice = x.TotalPrice
+                }).ToList()
+            };
+
+            await _context.Sales.AddAsync(newSale);
+
+            foreach (var item in newSale.SaleItems)
             {
                 var product = await _context.Products.FindAsync(item.ProductId);
-                if (product != null)
-                {
-                    product.CurrentStock -= item.Quantity;
-                }
+                if (product == null)
+                    throw new InvalidOperationException($"Ürün bulunamadý. ProductId={item.ProductId}");
+
+                if (product.CurrentStock < item.Quantity)
+                    throw new InvalidOperationException($"{product.Name} için yeterli stok yok.");
+
+                product.CurrentStock -= item.Quantity;
             }
 
-            // 3. Handle Installments if applicable
-            if (sale.SaleType == SaleType.Installment && plan != null)
+            if (newSale.SaleType == SaleType.Installment && plan != null)
             {
-                plan.Sale = sale;
-                await _context.InstallmentPlans.AddAsync(plan);
+                var newPlan = new InstallmentPlan
+                {
+                    Sale = newSale,
+                    TotalAmount = plan.TotalAmount,
+                    DownPayment = plan.DownPayment,
+                    InstallmentCount = plan.InstallmentCount,
+                    Installments = plan.Installments.Select(i => new Installment
+                    {
+                        Amount = i.Amount,
+                        DueDate = i.DueDate,
+                        Status = i.Status,
+                        PaidAmount = i.PaidAmount
+                    }).ToList()
+                };
+
+                await _context.InstallmentPlans.AddAsync(newPlan);
             }
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-            
-            return sale;
+
+            return newSale;
         }
         catch
         {
@@ -72,4 +127,42 @@ public class SaleService : ISaleService
             throw;
         }
     }
+
+
+    //public async Task<Sale> ProcessSaleAsync(Sale sale, InstallmentPlan? plan)
+    //{
+    //    using var transaction = await _context.Database.BeginTransactionAsync();
+    //    try
+    //    {
+    //        // 1. Add Sale
+    //        await _context.Sales.AddAsync(sale);
+
+    //        // 2. Update Stocks
+    //        foreach (var item in sale.SaleItems)
+    //        {
+    //            var product = await _context.Products.FindAsync(item.ProductId);
+    //            if (product != null)
+    //            {
+    //                product.CurrentStock -= item.Quantity;
+    //            }
+    //        }
+
+    //        // 3. Handle Installments if applicable
+    //        if (sale.SaleType == SaleType.Installment && plan != null)
+    //        {
+    //            plan.Sale = sale;
+    //            await _context.InstallmentPlans.AddAsync(plan);
+    //        }
+
+    //        await _context.SaveChangesAsync();
+    //        await transaction.CommitAsync();
+
+    //        return sale;
+    //    }
+    //    catch
+    //    {
+    //        await transaction.RollbackAsync();
+    //        throw;
+    //    }
+    //}
 }

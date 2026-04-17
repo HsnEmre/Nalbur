@@ -17,10 +17,19 @@ public class NalburDbContext : DbContext
     public DbSet<Installment> Installments => Set<Installment>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<OutgoingPayment> OutgoingPayments => Set<OutgoingPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // OutgoingPayment Configuration
+        modelBuilder.Entity<OutgoingPayment>()
+            .Property(op => op.Title).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<OutgoingPayment>()
+            .Property(op => op.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<OutgoingPayment>()
+            .Property(op => op.Category).HasMaxLength(100);
 
         // Product Configuration
         modelBuilder.Entity<Product>()

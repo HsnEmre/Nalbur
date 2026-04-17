@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nalbur.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Nalbur.Infrastructure.Data;
 namespace Nalbur.Infrastructure.Migrations
 {
     [DbContext(typeof(NalburDbContext))]
-    partial class NalburDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417091611_AddOutgoingPayments")]
+    partial class AddOutgoingPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -93,21 +93,20 @@
                 <TextBlock Text="Ödeme Paneli" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
 
                 <!-- Customer Selection -->
-                <ComboBox ItemsSource="{Binding FilteredCustomers}"
-                          SelectedItem="{Binding SelectedCustomer}"
-                          Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
-                          IsEditable="True"
-                          materialDesign:TextFieldAssist.HasClearButton="True"
-                          materialDesign:HintAssist.Hint="Müşteri Ara (Ad, Telefon...)"
-                          materialDesign:HintAssist.IsFloating="True"
-                          Style="{StaticResource MaterialDesignComboBox}"
-                          Margin="0,0,0,16">
+                <ComboBox ItemsSource="{Binding Customers}"
+          SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
+          materialDesign:HintAssist.Hint="Müşteri Seç"
+          materialDesign:HintAssist.IsFloating="True"
+          Style="{StaticResource MaterialDesignComboBox}"
+          Margin="0,0,0,16">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" />
-                                <TextBlock Text=" - " />
+                                <TextBlock Text=" " />
                                 <TextBlock Text="{Binding SurnameCompany}" />
+                                <TextBlock Text=" - " />
+                                <TextBlock Text="{Binding Phone}" />
                             </StackPanel>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>

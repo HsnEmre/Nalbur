@@ -28,6 +28,12 @@
         <DataTemplate DataType="{x:Type viewmodels:InstallmentViewModel}">
             <views:InstallmentTrackingView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:SalesHistoryViewModel}">
+            <views:SalesHistoryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:OutgoingPaymentsViewModel}">
+            <views:OutgoingPaymentsView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -73,6 +79,20 @@
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CalendarClock" Width="24" Height="24" Margin="0,0,10,0"/>
                         <TextBlock Text="Taksit Takip" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding NavigateToSalesHistoryCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="History" Width="24" Height="24" Margin="0,0,10,0"/>
+                        <TextBlock Text="Satış Geçmişi" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding NavigateToOutgoingPaymentsCommand}" Foreground="White" HorizontalContentAlignment="Left" Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CashMinus" Width="24" Height="24" Margin="0,0,10,0"/>
+                        <TextBlock Text="Ödeme/Gider Takip" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

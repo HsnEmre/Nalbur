@@ -22,6 +22,8 @@ public partial class MainViewModel : ViewModelBase
         NavigateToCustomersCommand = new RelayCommand(() => CurrentViewModel = _serviceProvider.GetRequiredService<CustomerViewModel>());
         NavigateToSalesCommand = new RelayCommand(() => CurrentViewModel = _serviceProvider.GetRequiredService<SalesViewModel>());
         NavigateToInstallmentsCommand = new RelayCommand(() => CurrentViewModel = _serviceProvider.GetRequiredService<InstallmentViewModel>());
+        NavigateToSalesHistoryCommand = new RelayCommand(() => CurrentViewModel = _serviceProvider.GetRequiredService<SalesHistoryViewModel>());
+        NavigateToOutgoingPaymentsCommand = new RelayCommand(() => CurrentViewModel = _serviceProvider.GetRequiredService<OutgoingPaymentsViewModel>());
 
         // Default view
         CurrentViewModel = _serviceProvider.GetRequiredService<DashboardViewModel>();
@@ -32,4 +34,6 @@ public partial class MainViewModel : ViewModelBase
     public IRelayCommand NavigateToCustomersCommand { get; }
     public IRelayCommand NavigateToSalesCommand { get; }
     public IRelayCommand NavigateToInstallmentsCommand { get; }
+    public IRelayCommand NavigateToSalesHistoryCommand { get; }
+    public IRelayCommand NavigateToOutgoingPaymentsCommand { get; }
 }

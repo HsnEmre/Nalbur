@@ -41,6 +41,14 @@ public partial class SalesViewModel : ViewModelBase
     [ObservableProperty]
     private Customer? _selectedCustomer;
 
+    partial void OnSelectedCustomerChanged(Customer? value)
+    {
+        if (value != null)
+        {
+            CustomerSearchText = $"{value.Name} {value.SurnameCompany}".Trim();
+        }
+    }
+
     [ObservableProperty]
     private SaleType _selectedSaleType = SaleType.Cash;
 
@@ -102,11 +110,11 @@ public partial class SalesViewModel : ViewModelBase
         }
 
         var lowerSearch = CustomerSearchText.ToLower();
-        var filtered = Customers.Where(c => 
-            c.Name.ToLower().Contains(lowerSearch) || 
+        var filtered = Customers.Where(c =>
+            c.Name.ToLower().Contains(lowerSearch) ||
             (c.SurnameCompany?.ToLower().Contains(lowerSearch) ?? false) ||
             (c.Phone?.Contains(lowerSearch) ?? false));
-            
+
         FilteredCustomers = new ObservableCollection<Customer>(filtered);
     }
 
@@ -125,12 +133,12 @@ public partial class SalesViewModel : ViewModelBase
             CartItems.Add(new SaleItem
             {
                 ProductId = product.Id,
-                Product = product,
                 Quantity = 1,
                 UnitPrice = product.SalePrice,
                 TotalPrice = product.SalePrice
             });
         }
+
         CalculateTotal();
     }
 
@@ -152,6 +160,16 @@ public partial class SalesViewModel : ViewModelBase
     {
         if (!CartItems.Any()) return;
 
+        if (SelectedSaleType == SaleType.Installment && SelectedCustomer == null)
+        {
+            System.Windows.MessageBox.Show(
+                "Taksitli satýþ için müþteri seçmelisiniz.",
+                "Uyarý",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
         var sale = new Sale
         {
             CustomerId = SelectedCustomer?.Id,
@@ -170,7 +188,6 @@ public partial class SalesViewModel : ViewModelBase
                 InstallmentCount = InstallmentCount
             };
 
-            // Generate dummy installments for simplicity in this MVP
             decimal installmentAmount = (TotalAmount - DownPayment) / InstallmentCount;
             for (int i = 1; i <= InstallmentCount; i++)
             {
@@ -184,11 +201,13 @@ public partial class SalesViewModel : ViewModelBase
         }
 
         await _saleService.ProcessSaleAsync(sale, plan);
-        
-        // Reset
+
         CartItems.Clear();
         TotalAmount = 0;
         SelectedCustomer = null;
+        CustomerSearchText = string.Empty;
         SelectedSaleType = SaleType.Cash;
+        DownPayment = 0;
+        InstallmentCount = 3;
     }
 }

@@ -50,6 +50,8 @@ public class InstallmentService : IInstallmentService
             .Include(i => i.InstallmentPlan)
                 .ThenInclude(ip => ip.Sale)
                     .ThenInclude(s => s.Customer)
+            .Include(i => i.InstallmentPlan.Sale.SaleItems)
+                .ThenInclude(si => si.Product)
             .Where(i => activePlanIds.Contains(i.InstallmentPlanId))
             .OrderBy(i => i.DueDate)
             .ToListAsync();
@@ -60,6 +62,9 @@ public class InstallmentService : IInstallmentService
         return await _context.Installments
             .Include(i => i.InstallmentPlan)
                 .ThenInclude(ip => ip.Sale)
+                    .ThenInclude(s => s.Customer)
+            .Include(i => i.InstallmentPlan.Sale.SaleItems)
+                .ThenInclude(si => si.Product)
             .Where(i => i.InstallmentPlan.Sale.CustomerId == customerId)
             .ToListAsync();
     }
@@ -147,5 +152,14 @@ public class ReminderService : IReminderService
                     .ThenInclude(s => s.Customer)
             .Where(i => i.Status != InstallmentStatus.Paid && i.DueDate.Date == DateTime.Today)
             .ToListAsync();
+    }
+
+    public async Task<int> GetActiveInstallmentCountAsync()
+    {
+        return await _context.Installments
+            .Where(i => i.Status != InstallmentStatus.Paid)
+            .Select(i => i.InstallmentPlanId)
+            .Distinct()
+            .CountAsync();
     }
 }

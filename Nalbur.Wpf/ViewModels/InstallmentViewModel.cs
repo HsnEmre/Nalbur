@@ -20,11 +20,24 @@ public partial class InstallmentViewModel : ViewModelBase
     [ObservableProperty]
     private decimal _paymentAmount;
 
+    [ObservableProperty]
+    private ObservableCollection<SaleItem> _selectedSaleItems = new();
+
+    [ObservableProperty]
+    private Sale? _selectedSale;
+
     partial void OnSelectedInstallmentChanged(Installment? value)
     {
         if (value != null)
         {
             PaymentAmount = value.RemainingAmount;
+            SelectedSale = value.InstallmentPlan?.Sale;
+            SelectedSaleItems = new ObservableCollection<SaleItem>(value.InstallmentPlan?.Sale?.SaleItems ?? new List<SaleItem>());
+        }
+        else
+        {
+            SelectedSale = null;
+            SelectedSaleItems.Clear();
         }
     }
 

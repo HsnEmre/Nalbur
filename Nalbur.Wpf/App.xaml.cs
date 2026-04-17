@@ -36,6 +36,8 @@ public partial class App : Application
                 services.AddTransient<CustomerViewModel>();
                 services.AddTransient<SalesViewModel>();
                 services.AddTransient<InstallmentViewModel>();
+                services.AddTransient<SalesHistoryViewModel>();
+                services.AddTransient<OutgoingPaymentsViewModel>();
 
                 // Views
                 services.AddSingleton<MainWindow>(s => new MainWindow

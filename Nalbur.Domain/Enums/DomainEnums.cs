@@ -20,3 +20,10 @@ public enum StockTransactionType
     In,
     Out
 }
+
+public enum OutgoingPaymentStatus
+{
+    Pending,
+    Paid,
+    Overdue
+}
