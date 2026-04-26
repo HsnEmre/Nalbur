@@ -5,9 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:enums="clr-namespace:Nalbur.Domain.Enums;assembly=Nalbur.Domain"
-             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
+             d:DesignHeight="700" 
+             d:DesignWidth="1000">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -24,28 +25,59 @@
                     <RowDefinition Height="200" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Ürün Seçimi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                <!-- Ürün başlığı + eklenecek adet -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="170" />
+                    </Grid.ColumnDefinitions>
 
-                <ListBox Grid.Row="1" ItemsSource="{Binding AvailableProducts}" 
+                    <TextBlock Text="Ürün Seçimi"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <TextBox Grid.Column="1"
+                             Text="{Binding QuantityToAdd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Eklenecek Adet"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}"
+                             PreviewTextInput="QuantityTextBox_PreviewTextInput"
+                             DataObject.Pasting="QuantityTextBox_Pasting" />
+                </Grid>
+
+                <!-- Ürün listesi -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding AvailableProducts}" 
                          ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
+
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <materialDesign:Card Width="150" Height="100" Margin="4" Padding="8">
                                 <Grid>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" Height="40" />
-                                        <TextBlock Text="{Binding SalePrice, StringFormat=C2}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
-                                        <TextBlock Text="{Binding CurrentStock, StringFormat='Stok: {0}'}" FontSize="10" />
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontWeight="Bold"
+                                                   TextWrapping="Wrap"
+                                                   Height="40" />
+
+                                        <TextBlock Text="{Binding SalePrice, StringFormat=C2}"
+                                                   Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+
+                                        <TextBlock Text="{Binding CurrentStock, StringFormat='Stok: {0}'}"
+                                                   FontSize="10" />
                                     </StackPanel>
+
                                     <Button Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource MaterialDesignIconButton}"
-                                            HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom">
                                         <materialDesign:PackIcon Kind="Plus" />
                                     </Button>
                                 </Grid>
@@ -56,8 +88,13 @@
 
                 <Separator Grid.Row="2" Margin="0,16" />
 
+                <!-- Sepet başlığı -->
                 <Grid Grid.Row="3" Margin="0,0,0,16">
-                    <TextBlock Text="Sepet" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Text="Sepet"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
                     <Button Command="{Binding ClearCartCommand}" 
                             Content="SEPETİ TEMİZLE" 
                             Style="{StaticResource MaterialDesignFlatButton}" 
@@ -65,18 +102,40 @@
                             Foreground="Red" 
                             FontSize="12" />
                 </Grid>
-                <DataGrid Grid.Row="3" ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" Margin="0,40,0,0">
+
+                <!-- Sepet listesi -->
+                <DataGrid Grid.Row="3"
+                          ItemsSource="{Binding CartItems}"
+                          AutoGenerateColumns="False"
+                          Margin="0,40,0,0"
+                          CanUserAddRows="False"
+                          IsReadOnly="True">
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ürün" Binding="{Binding Product.Name}" Width="*" />
-                        <DataGridTextColumn Header="Fiyat" Binding="{Binding UnitPrice, StringFormat=C2}" Width="80" />
-                        <DataGridTextColumn Header="Adet" Binding="{Binding Quantity}" Width="60" />
-                        <DataGridTextColumn Header="Toplam" Binding="{Binding TotalPrice, StringFormat=C2}" Width="100" />
+                        <DataGridTextColumn Header="Ürün"
+                                            Binding="{Binding Product.Name}"
+                                            Width="*" />
+
+                        <DataGridTextColumn Header="Fiyat"
+                                            Binding="{Binding UnitPrice, StringFormat=C2}"
+                                            Width="80" />
+
+                        <DataGridTextColumn Header="Adet"
+                                            Binding="{Binding Quantity}"
+                                            Width="60" />
+
+                        <DataGridTextColumn Header="Toplam"
+                                            Binding="{Binding TotalPrice, StringFormat=C2}"
+                                            Width="100" />
+
                         <DataGridTemplateColumn Width="50">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Command="{Binding DataContext.RemoveFromCartCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource MaterialDesignIconButton}" Foreground="Red" Padding="0">
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Foreground="Red"
+                                            Padding="0">
                                         <materialDesign:PackIcon Kind="Delete" />
                                     </Button>
                                 </DataTemplate>
@@ -90,15 +149,18 @@
         <!-- Checkout Section -->
         <materialDesign:Card Grid.Column="1" Padding="16">
             <StackPanel>
-                <TextBlock Text="Ödeme Paneli" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
+                <TextBlock Text="Ödeme Paneli"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,16" />
 
                 <!-- Customer Selection -->
                 <ComboBox ItemsSource="{Binding Customers}"
-          SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
-          materialDesign:HintAssist.Hint="Müşteri Seç"
-          materialDesign:HintAssist.IsFloating="True"
-          Style="{StaticResource MaterialDesignComboBox}"
-          Margin="0,0,0,16">
+                          SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
+                          materialDesign:HintAssist.Hint="Müşteri Seç"
+                          materialDesign:HintAssist.IsFloating="True"
+                          Style="{StaticResource MaterialDesignComboBox}"
+                          Margin="0,0,0,16">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -114,26 +176,101 @@
 
                 <!-- Payment Type -->
                 <TextBlock Text="Ödeme Türü" Margin="0,0,0,8" />
+
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <RadioButton Content="Nakit" IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Cash}}" Margin="0,0,16,0" />
-                    <RadioButton Content="Kart" IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Card}}" Margin="0,0,16,0" />
-                    <RadioButton Content="Taksit" IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Installment}}" />
+                    <RadioButton Content="Nakit"
+                                 IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Cash}}"
+                                 Margin="0,0,16,0" />
+
+                    <RadioButton Content="Kart"
+                                 IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Card}}"
+                                 Margin="0,0,16,0" />
+
+                    <RadioButton Content="Taksit"
+                                 IsChecked="{Binding SelectedSaleType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:SaleType.Installment}}" />
                 </StackPanel>
 
                 <!-- Installment Details -->
                 <StackPanel Visibility="{Binding SelectedSaleType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:SaleType.Installment}}">
-                    <TextBox Text="{Binding InstallmentCount}" materialDesign:HintAssist.Hint="Taksit Sayısı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
-                    <TextBox Text="{Binding DownPayment}" materialDesign:HintAssist.Hint="Peşinat" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
+                    <TextBox Text="{Binding InstallmentCount}"
+                             materialDesign:HintAssist.Hint="Taksit Sayısı"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}"
+                             Margin="0,0,0,16" />
+
+                    <TextBox Text="{Binding DownPayment}"
+                             materialDesign:HintAssist.Hint="Peşinat"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}"
+                             Margin="0,0,0,16" />
                 </StackPanel>
+
+                <!-- Discount Section -->
+                <TextBlock Text="İskonto"
+                           FontWeight="SemiBold"
+                           Margin="0,8,0,8" />
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0"
+                             Text="{Binding DiscountAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="İskonto Tutarı"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}" />
+
+                    <TextBox Grid.Column="2"
+                             Text="{Binding DiscountPercent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="İskonto %"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}" />
+                </Grid>
 
                 <Separator Margin="0,16" />
 
+                <!-- Total Summary -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Ara Toplam:" FontSize="14" />
+                    <TextBlock Grid.Column="1" Text="{Binding SubTotalAmount, StringFormat=C2}" FontSize="14" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="İskonto:" FontSize="14" />
+                    <TextBlock Grid.Column="1" Text="{Binding DiscountAmount, StringFormat=C2}" FontSize="14" Foreground="Red" />
+                </Grid>
+
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="TOPLAM:" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0" />
-                    <TextBlock Text="{Binding TotalAmount, StringFormat=C2}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                    <TextBlock Text="TOPLAM:"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0" />
+
+                    <TextBlock Text="{Binding TotalAmount, StringFormat=C2}"
+                               FontSize="32"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
                 </StackPanel>
 
-                <Button Command="{Binding ProcessSaleCommand}" Content="SATIŞI TAMAMLA" Height="60" Margin="0,40,0,0" FontSize="18" />
+                <Button Command="{Binding ProcessSaleCommand}"
+                        Content="SATIŞI TAMAMLA"
+                        Height="60"
+                        Margin="0,40,0,0"
+                        FontSize="18" />
             </StackPanel>
         </materialDesign:Card>
     </Grid>

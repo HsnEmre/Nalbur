@@ -12,6 +12,7 @@ public partial class SalesViewModel : ViewModelBase
     private readonly ISaleService _saleService;
     private readonly IProductService _productService;
     private readonly ICustomerService _customerService;
+    private bool _syncingDiscount;
 
     [ObservableProperty]
     private ObservableCollection<Product> _availableProducts = new();
@@ -53,7 +54,75 @@ public partial class SalesViewModel : ViewModelBase
     private SaleType _selectedSaleType = SaleType.Cash;
 
     [ObservableProperty]
+    private decimal _subTotalAmount;
+
+    [ObservableProperty]
+    private decimal _discountAmount;
+
+    partial void OnDiscountAmountChanged(decimal value)
+    {
+        if (_syncingDiscount) return;
+
+        if (value < 0)
+        {
+            DiscountAmount = 0;
+            return;
+        }
+
+        if (SubTotalAmount > 0 && value > SubTotalAmount)
+        {
+            DiscountAmount = SubTotalAmount;
+            return;
+        }
+
+        _syncingDiscount = true;
+        DiscountPercent = SubTotalAmount > 0
+            ? Math.Round((DiscountAmount / SubTotalAmount) * 100, 2)
+            : 0;
+        _syncingDiscount = false;
+
+        CalculateTotal();
+    }
+
+    [ObservableProperty]
+    private decimal _discountPercent;
+
+    partial void OnDiscountPercentChanged(decimal value)
+    {
+        if (_syncingDiscount) return;
+
+        if (value < 0)
+        {
+            DiscountPercent = 0;
+            return;
+        }
+
+        if (value > 100)
+        {
+            DiscountPercent = 100;
+            return;
+        }
+
+        _syncingDiscount = true;
+        DiscountAmount = Math.Round(SubTotalAmount * DiscountPercent / 100, 2);
+        _syncingDiscount = false;
+
+        CalculateTotal();
+    }
+
+    [ObservableProperty]
     private decimal _totalAmount;
+
+    [ObservableProperty]
+    private int _quantityToAdd = 1;
+
+    partial void OnQuantityToAddChanged(int value)
+    {
+        if (value < 1)
+        {
+            QuantityToAdd = 1;
+        }
+    }
 
     [ObservableProperty]
     private int _installmentCount = 3;
@@ -93,12 +162,15 @@ public partial class SalesViewModel : ViewModelBase
     private void ClearCart()
     {
         CartItems.Clear();
+        DiscountAmount = 0;
+        DiscountPercent = 0;
         CalculateTotal();
         SelectedCustomer = null;
         CustomerSearchText = string.Empty;
         SelectedSaleType = SaleType.Cash;
         DownPayment = 0;
         InstallmentCount = 3;
+        QuantityToAdd = 1;
     }
 
     private void FilterCustomers()
@@ -122,10 +194,35 @@ public partial class SalesViewModel : ViewModelBase
     {
         if (parameter is not Product product) return;
 
+        int quantity = QuantityToAdd < 1 ? 1 : QuantityToAdd;
+
+        if (product.CurrentStock < quantity)
+        {
+            System.Windows.MessageBox.Show(
+                $"Yetersiz stok. Mevcut stok: {product.CurrentStock}",
+                "Stok Uyarýsý",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
         var existingItem = CartItems.FirstOrDefault(i => i.ProductId == product.Id);
+
         if (existingItem != null)
         {
-            existingItem.Quantity++;
+            var newQuantity = existingItem.Quantity + quantity;
+
+            if (product.CurrentStock < newQuantity)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Yetersiz stok. Mevcut stok: {product.CurrentStock}, sepetteki mevcut adet: {existingItem.Quantity}",
+                    "Stok Uyarýsý",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            existingItem.Quantity = newQuantity;
             existingItem.TotalPrice = existingItem.Quantity * existingItem.UnitPrice;
         }
         else
@@ -133,9 +230,10 @@ public partial class SalesViewModel : ViewModelBase
             CartItems.Add(new SaleItem
             {
                 ProductId = product.Id,
-                Quantity = 1,
+                Product = product,
+                Quantity = quantity,
                 UnitPrice = product.SalePrice,
-                TotalPrice = product.SalePrice
+                TotalPrice = quantity * product.SalePrice
             });
         }
 
@@ -153,7 +251,28 @@ public partial class SalesViewModel : ViewModelBase
 
     private void CalculateTotal()
     {
-        TotalAmount = CartItems.Sum(i => i.TotalPrice);
+        SubTotalAmount = CartItems.Sum(i => i.TotalPrice);
+
+        _syncingDiscount = true;
+
+        if (SubTotalAmount <= 0)
+        {
+            DiscountAmount = 0;
+            DiscountPercent = 0;
+        }
+        else if (DiscountAmount > SubTotalAmount)
+        {
+            DiscountAmount = SubTotalAmount;
+            DiscountPercent = 100;
+        }
+        else
+        {
+            DiscountPercent = Math.Round((DiscountAmount / SubTotalAmount) * 100, 2);
+        }
+
+        _syncingDiscount = false;
+
+        TotalAmount = Math.Max(0, SubTotalAmount - DiscountAmount);
     }
 
     private async Task ProcessSaleAsync()
@@ -168,6 +287,39 @@ public partial class SalesViewModel : ViewModelBase
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Warning);
             return;
+        }
+
+        if (SelectedSaleType == SaleType.Installment)
+        {
+            if (InstallmentCount < 1)
+            {
+                System.Windows.MessageBox.Show(
+                    "Taksit sayýsý en az 1 olmalýdýr.",
+                    "Uyarý",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            if (DownPayment < 0)
+            {
+                System.Windows.MessageBox.Show(
+                    "Peþinat negatif olamaz.",
+                    "Uyarý",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            if (DownPayment > TotalAmount)
+            {
+                System.Windows.MessageBox.Show(
+                    "Peþinat, iskonto sonrasý toplam tutardan büyük olamaz.",
+                    "Uyarý",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
         }
 
         var sale = new Sale
@@ -202,12 +354,6 @@ public partial class SalesViewModel : ViewModelBase
 
         await _saleService.ProcessSaleAsync(sale, plan);
 
-        CartItems.Clear();
-        TotalAmount = 0;
-        SelectedCustomer = null;
-        CustomerSearchText = string.Empty;
-        SelectedSaleType = SaleType.Cash;
-        DownPayment = 0;
-        InstallmentCount = 3;
+        ClearCart();
     }
 }
