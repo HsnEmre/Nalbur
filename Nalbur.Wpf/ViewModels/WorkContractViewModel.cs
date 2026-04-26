@@ -70,6 +70,9 @@ public partial class WorkContractViewModel : ViewModelBase
         SaveContractCommand = new AsyncRelayCommand(SaveContractAsync);
         DeleteContractCommand = new AsyncRelayCommand(DeleteContractAsync);
         ClearFormCommand = new RelayCommand(ClearForm);
+        ExportSelectedContractExcelCommand = new RelayCommand(ExportSelectedContractExcel);
+        ExportSelectedContractWordCommand = new RelayCommand(ExportSelectedContractWord);
+        ExportSelectedContractPdfCommand = new RelayCommand(ExportSelectedContractPdf);
 
         ExportExcelCommand = new RelayCommand(() =>
             ExportHelper.ExportToExcel("Sözleşmeler", Contracts, ContractColumns()));
@@ -82,7 +85,9 @@ public partial class WorkContractViewModel : ViewModelBase
 
         LoadContractsCommand.Execute(null);
     }
-
+    public IRelayCommand ExportSelectedContractExcelCommand { get; }
+    public IRelayCommand ExportSelectedContractWordCommand { get; }
+    public IRelayCommand ExportSelectedContractPdfCommand { get; }
     public IAsyncRelayCommand LoadContractsCommand { get; }
     public IAsyncRelayCommand SearchCommand { get; }
     public IAsyncRelayCommand SaveContractCommand { get; }
@@ -104,7 +109,46 @@ public partial class WorkContractViewModel : ViewModelBase
         var result = await _contractService.GetFilteredAsync(StartDate, EndDate, SearchText);
         Contracts = new ObservableCollection<WorkContract>(result);
     }
+    private void ExportSelectedContractExcel()
+    {
+        var contract = GetContractForExport();
+        if (contract == null) return;
 
+        ContractExportHelper.ExportContractToExcel(contract);
+    }
+
+    private void ExportSelectedContractWord()
+    {
+        var contract = GetContractForExport();
+        if (contract == null) return;
+
+        ContractExportHelper.ExportContractToWord(contract);
+    }
+
+    private void ExportSelectedContractPdf()
+    {
+        var contract = GetContractForExport();
+        if (contract == null) return;
+
+        ContractExportHelper.ExportContractToPdf(contract);
+    }
+
+    private WorkContract? GetContractForExport()
+    {
+        if (SelectedContract != null)
+            return SelectedContract;
+
+        if (IsEditMode && NewContract.Id > 0)
+            return NewContract;
+
+        System.Windows.MessageBox.Show(
+            "Lütfen sözleşme formatında çıktı almak için kayıtlı bir sözleşme seçin.",
+            "Uyarı",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Warning);
+
+        return null;
+    }
     private async Task SaveContractAsync()
     {
         if (string.IsNullOrWhiteSpace(NewContract.Title))

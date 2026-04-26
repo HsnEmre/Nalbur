@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header / Filter / Export -->
+        <!-- Header / Filter / List Export -->
         <materialDesign:Card Grid.Row="0" Margin="0,0,0,16" Padding="16">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -52,6 +52,11 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             Margin="16,0,0,0">
+
+                    <TextBlock Text="Liste:"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,0" />
 
                     <Button Command="{Binding ExportExcelCommand}"
                             Content="EXCEL"
@@ -197,6 +202,31 @@
                                  Height="80"
                                  Style="{StaticResource MaterialDesignTextBox}"
                                  Margin="0,0,0,16" />
+
+                        <!-- Selected Contract Export -->
+                        <Separator Margin="0,4,0,12" />
+
+                        <TextBlock Text="Sözleşme Formatında Çıktı"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,0,16">
+
+                            <Button Command="{Binding ExportSelectedContractExcelCommand}"
+                                    Content="EXCEL"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportSelectedContractWordCommand}"
+                                    Content="WORD"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportSelectedContractPdfCommand}"
+                                    Content="PDF"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" />
+                        </StackPanel>
 
                         <Grid Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
