@@ -38,22 +38,31 @@ public class InstallmentService : IInstallmentService
 
     public async Task<List<Installment>> GetActiveInstallmentsAsync()
     {
-        // Get IDs of plans that have at least one unpaid installment
+        // En az 1 tane ödenmemiþ taksiti olan planlarý bul
         var activePlanIds = await _context.Installments
             .Where(i => i.Status != InstallmentStatus.Paid)
             .Select(i => i.InstallmentPlanId)
             .Distinct()
             .ToListAsync();
 
-        // Return all installments for those active plans (including PAID ones for history/context)
+        if (!activePlanIds.Any())
+            return new List<Installment>();
+
+        // Bu aktif planlara ait tüm taksitleri getir
+        // Paid olanlarý da getiriyoruz ki geçmiþ ödeme/taksit durumu tabloda görünsün
         return await _context.Installments
             .Include(i => i.InstallmentPlan)
                 .ThenInclude(ip => ip.Sale)
                     .ThenInclude(s => s.Customer)
-            .Include(i => i.InstallmentPlan.Sale.SaleItems)
-                .ThenInclude(si => si.Product)
+
+            .Include(i => i.InstallmentPlan)
+                .ThenInclude(ip => ip.Sale)
+                    .ThenInclude(s => s.SaleItems)
+                        .ThenInclude(si => si.Product)
+
             .Where(i => activePlanIds.Contains(i.InstallmentPlanId))
-            .OrderBy(i => i.DueDate)
+            .OrderBy(i => i.InstallmentPlanId)
+            .ThenBy(i => i.DueDate)
             .ToListAsync();
     }
 
