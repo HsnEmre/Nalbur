@@ -9,9 +9,23 @@ namespace Nalbur.Wpf.ViewModels;
 public partial class CustomerViewModel : ViewModelBase
 {
     private readonly ICustomerService _customerService;
+    private List<Customer> _allCustomers = new();
 
     [ObservableProperty]
     private ObservableCollection<Customer> _customers = new();
+
+    private string _searchText = string.Empty;
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                FilterCustomers();
+            }
+        }
+    }
 
     [ObservableProperty]
     private Customer? _selectedCustomer;
@@ -26,7 +40,6 @@ public partial class CustomerViewModel : ViewModelBase
     {
         if (value != null)
         {
-            // Create a copy to edit
             NewCustomer = new Customer
             {
                 Id = value.Id,
@@ -36,6 +49,7 @@ public partial class CustomerViewModel : ViewModelBase
                 Email = value.Email,
                 Address = value.Address
             };
+
             IsEditMode = true;
         }
         else
@@ -47,11 +61,12 @@ public partial class CustomerViewModel : ViewModelBase
     public CustomerViewModel(ICustomerService customerService)
     {
         _customerService = customerService;
+
         LoadCustomersCommand = new AsyncRelayCommand(LoadCustomersAsync);
         SaveCustomerCommand = new AsyncRelayCommand(SaveCustomerAsync);
         DeleteCustomerCommand = new AsyncRelayCommand(DeleteCustomerAsync);
         ClearFormCommand = new RelayCommand(ClearForm);
-        
+
         LoadCustomersCommand.Execute(null);
     }
 
@@ -63,7 +78,38 @@ public partial class CustomerViewModel : ViewModelBase
     private async Task LoadCustomersAsync()
     {
         var customers = await _customerService.GetAllAsync();
-        Customers = new ObservableCollection<Customer>(customers);
+
+        _allCustomers = customers
+            .OrderBy(x => x.Name)
+            .ThenBy(x => x.SurnameCompany)
+            .ToList();
+
+        FilterCustomers();
+    }
+
+    private void FilterCustomers()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Customers = new ObservableCollection<Customer>(_allCustomers);
+            return;
+        }
+
+        var search = SearchText.Trim();
+
+        var filteredCustomers = _allCustomers
+            .Where(c =>
+                (!string.IsNullOrWhiteSpace(c.Name) &&
+                 c.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase)) ||
+
+                (!string.IsNullOrWhiteSpace(c.SurnameCompany) &&
+                 c.SurnameCompany.Contains(search, StringComparison.CurrentCultureIgnoreCase)) ||
+
+                (!string.IsNullOrWhiteSpace(c.Phone) &&
+                 c.Phone.Contains(search, StringComparison.CurrentCultureIgnoreCase)))
+            .ToList();
+
+        Customers = new ObservableCollection<Customer>(filteredCustomers);
     }
 
     private async Task SaveCustomerAsync()
@@ -78,7 +124,7 @@ public partial class CustomerViewModel : ViewModelBase
         {
             await _customerService.AddAsync(NewCustomer);
         }
-        
+
         ClearForm();
         await LoadCustomersAsync();
     }
@@ -87,15 +133,16 @@ public partial class CustomerViewModel : ViewModelBase
     {
         if (SelectedCustomer == null) return;
 
-        // In a real app, I'd check for existing sales/installments via a service call.
-        // For now, I'll implement a safety warning.
         var msg = $"{SelectedCustomer.Name} {SelectedCustomer.SurnameCompany} silinecek.\n\n" +
                   "UYARI: Bu müşteriye ait satış veya taksit verisi varsa silme işlemi başarısız olabilir.";
 
-        if (System.Windows.MessageBox.Show(msg, "Onay", 
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
+        if (System.Windows.MessageBox.Show(
+                msg,
+                "Onay",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
         {
-            try 
+            try
             {
                 await _customerService.DeleteAsync(SelectedCustomer.Id);
                 ClearForm();
@@ -103,8 +150,11 @@ public partial class CustomerViewModel : ViewModelBase
             }
             catch (System.Exception ex)
             {
-                System.Windows.MessageBox.Show($"Silme hatası: {ex.Message}\n\nBu müşteri muhtemelen sistemde işlem görmüş (Satış/Taksit).", 
-                    "Hata", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                System.Windows.MessageBox.Show(
+                    $"Silme hatası: {ex.Message}\n\nBu müşteri muhtemelen sistemde işlem görmüş (Satış/Taksit).",
+                    "Hata",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
     }

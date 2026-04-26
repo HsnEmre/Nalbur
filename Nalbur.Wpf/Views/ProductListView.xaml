@@ -6,6 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -19,11 +20,32 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Text="Ürün Listesi" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16" />
-                
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" 
+
+                <!-- Başlık + Arama -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Ürün Listesi"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <TextBox Grid.Column="1"
+                             Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Ürün adına göre ara"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignTextBox}" />
+                </Grid>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Products}" 
                           SelectedItem="{Binding SelectedProduct}"
-                          AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Kod" Binding="{Binding Code}" Width="80" />
                         <DataGridTextColumn Header="Barkod" Binding="{Binding Barcode}" Width="100" />
@@ -51,7 +73,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                
+
                 <TextBox Text="{Binding NewProduct.Code}" materialDesign:HintAssist.Hint="Ürün Kodu" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
                 <TextBox Text="{Binding NewProduct.Barcode}" materialDesign:HintAssist.Hint="Barkod" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
                 <TextBox Text="{Binding NewProduct.Name}" materialDesign:HintAssist.Hint="Ürün Adı" materialDesign:HintAssist.IsFloating="True" Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,0,16" />
@@ -66,6 +88,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -84,9 +107,13 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Grid.Row="1" Grid.Column="0" Command="{Binding DeleteProductCommand}" 
+                    <Button Grid.Row="1"
+                            Grid.Column="0"
+                            Command="{Binding DeleteProductCommand}" 
                             Content="SİL" 
-                            Margin="0,0,4,0" BorderBrush="Red" Foreground="Red">
+                            Margin="0,0,4,0"
+                            BorderBrush="Red"
+                            Foreground="Red">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -99,8 +126,11 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding ClearFormCommand}" 
-                            Content="TEMİZLE" Style="{StaticResource MaterialDesignFlatButton}" 
+                    <Button Grid.Row="1"
+                            Grid.Column="1"
+                            Command="{Binding ClearFormCommand}" 
+                            Content="TEMİZLE"
+                            Style="{StaticResource MaterialDesignFlatButton}" 
                             Margin="4,0,0,0" />
                 </Grid>
             </StackPanel>

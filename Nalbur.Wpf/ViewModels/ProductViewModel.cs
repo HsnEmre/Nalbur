@@ -9,9 +9,23 @@ namespace Nalbur.Wpf.ViewModels;
 public partial class ProductViewModel : ViewModelBase
 {
     private readonly IProductService _productService;
+    private List<Product> _allProducts = new();
 
     [ObservableProperty]
     private ObservableCollection<Product> _products = new();
+
+    private string _searchText = string.Empty;
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                FilterProducts();
+            }
+        }
+    }
 
     [ObservableProperty]
     private Product? _selectedProduct;
@@ -26,7 +40,6 @@ public partial class ProductViewModel : ViewModelBase
     {
         if (value != null)
         {
-            // Create a copy to edit
             NewProduct = new Product
             {
                 Id = value.Id,
@@ -40,6 +53,7 @@ public partial class ProductViewModel : ViewModelBase
                 MinimumStock = value.MinimumStock,
                 IsActive = value.IsActive
             };
+
             IsEditMode = true;
         }
         else
@@ -51,11 +65,12 @@ public partial class ProductViewModel : ViewModelBase
     public ProductViewModel(IProductService productService)
     {
         _productService = productService;
+
         LoadProductsCommand = new AsyncRelayCommand(LoadProductsAsync);
         SaveProductCommand = new AsyncRelayCommand(SaveProductAsync);
         DeleteProductCommand = new AsyncRelayCommand(DeleteProductAsync);
         ClearFormCommand = new RelayCommand(ClearForm);
-        
+
         LoadProductsCommand.Execute(null);
     }
 
@@ -67,7 +82,31 @@ public partial class ProductViewModel : ViewModelBase
     private async Task LoadProductsAsync()
     {
         var products = await _productService.GetAllAsync();
-        Products = new ObservableCollection<Product>(products);
+
+        _allProducts = products
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        FilterProducts();
+    }
+
+    private void FilterProducts()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Products = new ObservableCollection<Product>(_allProducts);
+            return;
+        }
+
+        var search = SearchText.Trim();
+
+        var filteredProducts = _allProducts
+            .Where(p =>
+                !string.IsNullOrWhiteSpace(p.Name) &&
+                p.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase))
+            .ToList();
+
+        Products = new ObservableCollection<Product>(filteredProducts);
     }
 
     private async Task SaveProductAsync()
@@ -82,7 +121,7 @@ public partial class ProductViewModel : ViewModelBase
         {
             await _productService.AddAsync(NewProduct);
         }
-        
+
         ClearForm();
         await LoadProductsAsync();
     }
@@ -91,10 +130,11 @@ public partial class ProductViewModel : ViewModelBase
     {
         if (SelectedProduct == null) return;
 
-        // Simple confirmation via task (in a real app, use a dialog service)
-        // Since I'm in MVVM but restricted to in-place, I'll use System.Windows.MessageBox directly for MVP
-        if (System.Windows.MessageBox.Show($"{SelectedProduct.Name} silinecek. Emin misiniz?", "Onay", 
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
+        if (System.Windows.MessageBox.Show(
+                $"{SelectedProduct.Name} silinecek. Emin misiniz?",
+                "Onay",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
         {
             await _productService.DeleteAsync(SelectedProduct.Id);
             ClearForm();
