@@ -1,11 +1,12 @@
-using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nalbur.Domain.Interfaces;
 using Nalbur.Infrastructure;
 using Nalbur.Infrastructure.Services;
 using Nalbur.Wpf.ViewModels;
 using Nalbur.Wpf.Views;
+using System.Windows;
 
 namespace Nalbur.Wpf;
 
@@ -38,7 +39,11 @@ public partial class App : Application
                 services.AddTransient<InstallmentViewModel>();
                 services.AddTransient<SalesHistoryViewModel>();
                 services.AddTransient<OutgoingPaymentsViewModel>();
-
+                services.AddScoped<IWorkContractService, WorkContractService>();
+                services.AddTransient<WorkContractViewModel>();
+                services.AddTransient<WorkContractView>();
+                services.AddTransient<ReportsViewModel>();
+                services.AddTransient<ReportsView>();
                 // Views
                 services.AddSingleton<MainWindow>(s => new MainWindow
                 {

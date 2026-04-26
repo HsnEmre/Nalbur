@@ -12,7 +12,8 @@ public enum InstallmentStatus
 {
     Pending,
     Paid,
-    Overdue
+    Overdue,
+    Cancelled 
 }
 
 public enum StockTransactionType

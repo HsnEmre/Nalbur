@@ -114,11 +114,11 @@ public partial class SalesViewModel : ViewModelBase
     private decimal _totalAmount;
 
     [ObservableProperty]
-    private int _quantityToAdd = 1;
+    private decimal _quantityToAdd = 1;
 
-    partial void OnQuantityToAddChanged(int value)
+    partial void OnQuantityToAddChanged(decimal value)
     {
-        if (value < 1)
+        if (value <= 0)
         {
             QuantityToAdd = 1;
         }
@@ -194,7 +194,7 @@ public partial class SalesViewModel : ViewModelBase
     {
         if (parameter is not Product product) return;
 
-        int quantity = QuantityToAdd < 1 ? 1 : QuantityToAdd;
+        decimal quantity = QuantityToAdd <= 0 ? 1 : QuantityToAdd;
 
         if (product.CurrentStock < quantity)
         {

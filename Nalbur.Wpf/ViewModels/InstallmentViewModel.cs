@@ -61,13 +61,22 @@ public partial class InstallmentViewModel : ViewModelBase
 
         RefreshCommand = new AsyncRelayCommand(LoadInstallmentsAsync);
         PayInstallmentCommand = new AsyncRelayCommand(PayInstallmentAsync);
+        ExportExcelCommand = new RelayCommand(() =>
+    ExportHelper.ExportToExcel("Taksit Takip Listesi", Installments, InstallmentColumns()));
 
+        ExportWordCommand = new RelayCommand(() =>
+            ExportHelper.ExportToWord("Taksit Takip Listesi", Installments, InstallmentColumns()));
+
+        ExportPdfCommand = new RelayCommand(() =>
+            ExportHelper.ExportToPdf("Taksit Takip Listesi", Installments, InstallmentColumns()));
         RefreshCommand.Execute(null);
     }
 
     public IAsyncRelayCommand RefreshCommand { get; }
     public IAsyncRelayCommand PayInstallmentCommand { get; }
-
+    public IRelayCommand ExportExcelCommand { get; }
+    public IRelayCommand ExportWordCommand { get; }
+    public IRelayCommand ExportPdfCommand { get; }
     private async Task LoadInstallmentsAsync()
     {
         var allActive = await _installmentService.GetActiveInstallmentsAsync();
@@ -78,7 +87,22 @@ public partial class InstallmentViewModel : ViewModelBase
 
         FilterInstallments();
     }
-
+    private static List<ExportColumn<Installment>> InstallmentColumns()
+    {
+        return new List<ExportColumn<Installment>>
+    {
+        new("Müþteri", x => $"{x.InstallmentPlan?.Sale?.Customer?.Name} {x.InstallmentPlan?.Sale?.Customer?.SurnameCompany}".Trim()),
+        new("Telefon", x => x.InstallmentPlan?.Sale?.Customer?.Phone),
+        new("Taksit Tutarý", x => x.Amount),
+        new("Ödenen", x => x.PaidAmount),
+        new("Kalan", x => x.RemainingAmount),
+        new("Vade Tarihi", x => x.DueDate),
+        new("Son Ödeme Tarihi", x => x.PaymentDate),
+        new("Taksit Durumu", x => x.Status),
+        new("Satýþ Toplamý", x => x.InstallmentPlan?.Sale?.TotalAmount),
+        new("Peþinat", x => x.InstallmentPlan?.DownPayment)
+    };
+    }
     private void FilterInstallments()
     {
         if (string.IsNullOrWhiteSpace(SearchText))

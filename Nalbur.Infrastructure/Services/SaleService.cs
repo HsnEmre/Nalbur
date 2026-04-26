@@ -50,7 +50,58 @@ public class SaleService : ISaleService
 
         return await query.OrderByDescending(s => s.SaleDate).ToListAsync();
     }
+    public async Task DeleteSaleAsync(int saleId, bool restoreStock = true)
+    {
+        var sale = await _context.Sales
+            .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+            .Include(s => s.InstallmentPlan)
+                .ThenInclude(ip => ip.Installments)
+            .FirstOrDefaultAsync(s => s.Id == saleId);
 
+        if (sale == null)
+            throw new Exception("Satýþ bulunamadý.");
+
+        // Satýþ daha önce iade edilmemiþse stoklarý geri ekle.
+        // Eðer IsReturned true ise zaten stok geri dönmüþtür, tekrar eklemiyoruz.
+        if (restoreStock && !sale.IsReturned)
+        {
+            foreach (var item in sale.SaleItems)
+            {
+                var product = item.Product;
+
+                if (product == null)
+                {
+                    product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                }
+
+                if (product != null)
+                {
+                    product.CurrentStock += item.Quantity;
+                }
+            }
+        }
+
+        if (sale.InstallmentPlan != null)
+        {
+            if (sale.InstallmentPlan.Installments != null && sale.InstallmentPlan.Installments.Any())
+            {
+                _context.Installments.RemoveRange(sale.InstallmentPlan.Installments);
+            }
+
+            _context.InstallmentPlans.Remove(sale.InstallmentPlan);
+        }
+
+        if (sale.SaleItems != null && sale.SaleItems.Any())
+        {
+            _context.SaleItems.RemoveRange(sale.SaleItems);
+        }
+
+        _context.Sales.Remove(sale);
+
+        await _context.SaveChangesAsync();
+    }
     public async Task<Sale?> GetSaleByIdAsync(int id)
     {
         return await _context.Sales
@@ -61,6 +112,60 @@ public class SaleService : ISaleService
                 .ThenInclude(ip => ip.Installments)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
+    public async Task ReturnSaleAsync(int saleId, string? note = null)
+    {
+        var sale = await _context.Sales
+            .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+            .Include(s => s.InstallmentPlan)
+                .ThenInclude(ip => ip.Installments)
+            .FirstOrDefaultAsync(s => s.Id == saleId);
+
+        if (sale == null)
+            throw new Exception("Satýþ bulunamadý.");
+
+        if (sale.IsReturned)
+            throw new Exception("Bu satýþ zaten iade edilmiþ.");
+
+        if (sale.SaleItems == null || !sale.SaleItems.Any())
+            throw new Exception("Satýþa ait ürün bulunamadý.");
+
+        foreach (var item in sale.SaleItems)
+        {
+            var product = item.Product;
+
+            if (product == null)
+            {
+                product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.Id == item.ProductId);
+            }
+
+            if (product == null)
+                throw new Exception($"Ürün bulunamadý. ProductId: {item.ProductId}");
+
+            // Satýlan ürün stoða geri eklenir
+            product.CurrentStock += item.Quantity;
+        }
+
+        sale.IsReturned = true;
+        sale.ReturnedAt = DateTime.Now;
+        sale.ReturnNote = note;
+
+        // Taksitli satýþsa ödenmemiþ taksitleri iptal et
+        if (sale.InstallmentPlan != null)
+        {
+            foreach (var installment in sale.InstallmentPlan.Installments)
+            {
+                if (installment.Status != InstallmentStatus.Paid)
+                {
+                    installment.Status = InstallmentStatus.Cancelled;
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
 
     public async Task<Sale> ProcessSaleAsync(Sale sale, InstallmentPlan? plan)
     {

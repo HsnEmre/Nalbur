@@ -168,8 +168,47 @@
                             Content="TEMİZLE"
                             Style="{StaticResource MaterialDesignFlatButton}" 
                             Margin="4,0,0,0" />
+                                                          
+                    
                 </Grid>
+
+                <Grid>
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--<TextBlock Text="Müşteri Listesi"
+               FontSize="18"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center" />-->
+
+                        <StackPanel Grid.Column="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+
+                            <Button Command="{Binding ExportExcelCommand}"
+                Content="EXCEL"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportWordCommand}"
+                Content="WORD"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportPdfCommand}"
+                Content="PDF"
+                Style="{StaticResource MaterialDesignOutlinedButton}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                
+                
+                
             </StackPanel>
+            
         </materialDesign:Card>
     </Grid>
 </UserControl>

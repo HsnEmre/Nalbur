@@ -18,37 +18,71 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Filters -->
+        <!-- Filters + Export Buttons -->
         <materialDesign:Card Grid.Row="0" Margin="0,0,0,16" Padding="16">
-            <StackPanel Orientation="Horizontal">
-                <DatePicker SelectedDate="{Binding StartDate}" 
-                            materialDesign:HintAssist.Hint="Başlangıç" 
-                            Width="150" Margin="0,0,16,0"
-                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <DatePicker SelectedDate="{Binding EndDate}" 
-                            materialDesign:HintAssist.Hint="Bitiş" 
-                            Width="150" Margin="0,0,16,0"
-                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <!-- Filters -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <DatePicker SelectedDate="{Binding StartDate}" 
+                                materialDesign:HintAssist.Hint="Başlangıç" 
+                                Width="150"
+                                Margin="0,0,16,0"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
 
-                <ComboBox ItemsSource="{Binding Customers}" 
-                          SelectedItem="{Binding SelectedCustomer}"
-                          DisplayMemberPath="Name"
-                          materialDesign:HintAssist.Hint="Müşteri Filtresi" 
-                          Width="200" Margin="0,0,16,0"
-                          materialDesign:TextFieldAssist.HasClearButton="True"
-                          Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+                    <DatePicker SelectedDate="{Binding EndDate}" 
+                                materialDesign:HintAssist.Hint="Bitiş" 
+                                Width="150"
+                                Margin="0,0,16,0"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
 
-                <ComboBox ItemsSource="{Binding SaleTypeOptions}" 
-                          SelectedItem="{Binding SaleTypeFilter}"
-                          materialDesign:HintAssist.Hint="Satış Türü" 
-                          Width="120" Margin="0,0,16,0"
-                          Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+                    <ComboBox ItemsSource="{Binding Customers}" 
+                              SelectedItem="{Binding SelectedCustomer}"
+                              DisplayMemberPath="Name"
+                              materialDesign:HintAssist.Hint="Müşteri Filtresi" 
+                              Width="200"
+                              Margin="0,0,16,0"
+                              materialDesign:TextFieldAssist.HasClearButton="True"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
 
-                <Button Command="{Binding SearchCommand}" 
-                        Content="ARA" 
-                        VerticalAlignment="Bottom" />
-            </StackPanel>
+                    <ComboBox ItemsSource="{Binding SaleTypeOptions}" 
+                              SelectedItem="{Binding SaleTypeFilter}"
+                              materialDesign:HintAssist.Hint="Satış Türü" 
+                              Width="120"
+                              Margin="0,0,16,0"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+
+                    <Button Command="{Binding SearchCommand}" 
+                            Content="ARA" 
+                            VerticalAlignment="Bottom" />
+                </StackPanel>
+
+                <!-- Export Buttons -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="16,0,0,0">
+
+                    <Button Command="{Binding ExportExcelCommand}"
+                            Content="EXCEL"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0" />
+
+                    <Button Command="{Binding ExportWordCommand}"
+                            Content="WORD"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0" />
+
+                    <Button Command="{Binding ExportPdfCommand}"
+                            Content="PDF"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" />
+                </StackPanel>
+            </Grid>
         </materialDesign:Card>
 
         <Grid Grid.Row="1">
@@ -63,14 +97,58 @@
                           SelectedItem="{Binding SelectedSale}"
                           AutoGenerateColumns="False" 
                           IsReadOnly="True"
-                          SelectionMode="Single">
+                          SelectionMode="Single"
+                          Margin="0,0,0,70">
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="No" Binding="{Binding Id}" Width="50" />
-                        <DataGridTextColumn Header="Tarih" Binding="{Binding SaleDate, StringFormat=dd.MM.yyyy HH:mm}" Width="130" />
-                        <DataGridTextColumn Header="Müşteri" Binding="{Binding Customer.Name}" Width="*" />
-                        <DataGridTextColumn Header="Tür" Binding="{Binding SaleType}" Width="80" />
-                        <DataGridTextColumn Header="Toplam" Binding="{Binding TotalAmount, StringFormat=C2}" Width="100" FontWeight="Bold" />
-                        <DataGridTextColumn Header="Ürün" Binding="{Binding SaleItems.Count}" Width="50" />
+                        <DataGridTextColumn Header="No"
+                                            Binding="{Binding Id}"
+                                            Width="50" />
+
+                        <DataGridTextColumn Header="Tarih"
+                                            Binding="{Binding SaleDate, StringFormat=dd.MM.yyyy HH:mm}"
+                                            Width="130" />
+
+                        <DataGridTextColumn Header="Müşteri"
+                                            Binding="{Binding Customer.Name}"
+                                            Width="*" />
+
+                        <DataGridTextColumn Header="Tür"
+                                            Binding="{Binding SaleType}"
+                                            Width="80" />
+
+                        <DataGridTextColumn Header="Toplam"
+                                            Binding="{Binding TotalAmount, StringFormat=C2}"
+                                            Width="100"
+                                            FontWeight="Bold" />
+
+                        <!-- İade Durumu -->
+                        <DataGridTemplateColumn Header="Durum" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Satış" />
+                                                <Setter Property="Foreground" Value="Green" />
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsReturned}" Value="True">
+                                                        <Setter Property="Text" Value="İade Edildi" />
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Ürün"
+                                            Binding="{Binding SaleItems.Count}"
+                                            Width="50" />
                     </DataGrid.Columns>
                 </DataGrid>
             </materialDesign:Card>
@@ -85,22 +163,104 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="SATIŞ DETAYLARI" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" />
+                    <TextBlock Grid.Row="0"
+                               Text="SATIŞ DETAYLARI"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,16" />
 
                     <StackPanel Grid.Row="1" Margin="0,0,0,16">
                         <Grid Margin="0,2">
                             <TextBlock Text="Müşteri:" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding SelectedSale.Customer.Name}" HorizontalAlignment="Right" />
                         </Grid>
+
                         <Grid Margin="0,2">
                             <TextBlock Text="Tarih:" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=G}" HorizontalAlignment="Right" />
                         </Grid>
+
                         <Grid Margin="0,2">
                             <TextBlock Text="Toplam Tutar:" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C2}" HorizontalAlignment="Right" FontSize="16" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                            <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C2}"
+                                       HorizontalAlignment="Right"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
                         </Grid>
-                        <Separator Margin="0,8" />
+                        <StackPanel Orientation="Horizontal"
+            Margin="0,12,0,0">
+
+                            <Button Command="{Binding ExportSelectedSaleInvoiceExcelCommand}"
+            Content="FATURA EXCEL"
+            Style="{StaticResource MaterialDesignOutlinedButton}"
+            Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportSelectedSaleInvoiceWordCommand}"
+            Content="WORD"
+            Style="{StaticResource MaterialDesignOutlinedButton}"
+            Margin="0,0,8,0" />
+
+                            <Button Command="{Binding ExportSelectedSaleInvoicePdfCommand}"
+            Content="PDF"
+            Style="{StaticResource MaterialDesignOutlinedButton}" />
+                        </StackPanel>
+
+                        <Button Command="{Binding DeleteSaleCommand}"
+        Content="SATIŞI SİL"
+        Height="40"
+        Margin="0,12,0,0"
+        Background="DarkRed"
+        Foreground="White">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}" />
+                            </Button.Style>
+                        </Button>
+                        <Grid Margin="0,2">
+                            <TextBlock Text="Durum:" FontWeight="SemiBold" />
+                            <TextBlock HorizontalAlignment="Right">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Satış" />
+                                        <Setter Property="Foreground" Value="Green" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedSale.IsReturned}" Value="True">
+                                                <Setter Property="Text" Value="İade Edildi" />
+                                                <Setter Property="Foreground" Value="Red" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <Grid Margin="0,2">
+                            <TextBlock Text="İade Tarihi:" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding SelectedSale.ReturnedAt, StringFormat=dd.MM.yyyy HH:mm}"
+                                       HorizontalAlignment="Right" />
+                        </Grid>
+
+                        <Button Command="{Binding ReturnSaleCommand}"
+                                Content="İADE ET"
+                                Height="40"
+                                Margin="0,12,0,0"
+                                Background="DarkRed"
+                                Foreground="White">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                    <Setter Property="Visibility" Value="Visible" />
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedSale.IsReturned}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Separator Margin="0,12,0,8" />
                     </StackPanel>
 
                     <Grid Grid.Row="2">
@@ -108,31 +268,62 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Ürün Listesi" FontWeight="Bold" Margin="0,0,0,8" />
-                        <DataGrid Grid.Row="1" ItemsSource="{Binding SelectedSale.SaleItems}" AutoGenerateColumns="False" IsReadOnly="True">
+
+                        <TextBlock Text="Ürün Listesi"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8" />
+
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding SelectedSale.SaleItems}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True">
+
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Ürün" Binding="{Binding Product.Name}" Width="*" />
-                                <DataGridTextColumn Header="Adet" Binding="{Binding Quantity}" Width="50" />
-                                <DataGridTextColumn Header="Fiyat" Binding="{Binding UnitPrice, StringFormat=C2}" Width="80" />
-                                <DataGridTextColumn Header="Toplam" Binding="{Binding TotalPrice, StringFormat=C2}" Width="90" />
+                                <DataGridTextColumn Header="Ürün"
+                                                    Binding="{Binding Product.Name}"
+                                                    Width="*" />
+
+                                <DataGridTextColumn Header="Adet"
+                                                    Binding="{Binding Quantity}"
+                                                    Width="50" />
+
+                                <DataGridTextColumn Header="Fiyat"
+                                                    Binding="{Binding UnitPrice, StringFormat=C2}"
+                                                    Width="80" />
+
+                                <DataGridTextColumn Header="Toplam"
+                                                    Binding="{Binding TotalPrice, StringFormat=C2}"
+                                                    Width="90" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
 
                     <!-- Installment Info if exists -->
-                    <StackPanel Grid.Row="3" Margin="0,16,0,0" Visibility="{Binding SelectedSale.InstallmentPlan, Converter={StaticResource NullToVisibilityConverter}}">
-                        <TextBlock Text="TAKSİT PLANI" FontWeight="Bold" Margin="0,0,0,8" />
+                    <StackPanel Grid.Row="3"
+                                Margin="0,16,0,0"
+                                Visibility="{Binding SelectedSale.InstallmentPlan, Converter={StaticResource NullToVisibilityConverter}}">
+
+                        <TextBlock Text="TAKSİT PLANI"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8" />
+
                         <Grid Margin="0,2">
                             <TextBlock Text="Peşinat:" />
-                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.DownPayment, StringFormat=C2}" HorizontalAlignment="Right" />
+                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.DownPayment, StringFormat=C2}"
+                                       HorizontalAlignment="Right" />
                         </Grid>
+
                         <Grid Margin="0,2">
                             <TextBlock Text="Taksit Sayısı:" />
-                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.InstallmentCount}" HorizontalAlignment="Right" />
+                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.InstallmentCount}"
+                                       HorizontalAlignment="Right" />
                         </Grid>
+
                         <Grid Margin="0,2">
                             <TextBlock Text="Kalan Tutar:" />
-                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.RemainingAmount, StringFormat=C2}" HorizontalAlignment="Right" Foreground="Red" />
+                            <TextBlock Text="{Binding SelectedSale.InstallmentPlan.RemainingAmount, StringFormat=C2}"
+                                       HorizontalAlignment="Right"
+                                       Foreground="Red" />
                         </Grid>
                     </StackPanel>
                 </Grid>

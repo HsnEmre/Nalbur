@@ -27,6 +27,8 @@ public partial class CustomerViewModel : ViewModelBase
         }
     }
 
+   
+
     [ObservableProperty]
     private Customer? _selectedCustomer;
 
@@ -66,7 +68,14 @@ public partial class CustomerViewModel : ViewModelBase
         SaveCustomerCommand = new AsyncRelayCommand(SaveCustomerAsync);
         DeleteCustomerCommand = new AsyncRelayCommand(DeleteCustomerAsync);
         ClearFormCommand = new RelayCommand(ClearForm);
+        ExportExcelCommand = new RelayCommand(() =>
+    ExportHelper.ExportToExcel("Müşteri Listesi", Customers, CustomerColumns()));
 
+        ExportWordCommand = new RelayCommand(() =>
+            ExportHelper.ExportToWord("Müşteri Listesi", Customers, CustomerColumns()));
+
+        ExportPdfCommand = new RelayCommand(() =>
+            ExportHelper.ExportToPdf("Müşteri Listesi", Customers, CustomerColumns()));
         LoadCustomersCommand.Execute(null);
     }
 
@@ -74,7 +83,9 @@ public partial class CustomerViewModel : ViewModelBase
     public IAsyncRelayCommand SaveCustomerCommand { get; }
     public IAsyncRelayCommand DeleteCustomerCommand { get; }
     public IRelayCommand ClearFormCommand { get; }
-
+    public IRelayCommand ExportExcelCommand { get; }
+    public IRelayCommand ExportWordCommand { get; }
+    public IRelayCommand ExportPdfCommand { get; }
     private async Task LoadCustomersAsync()
     {
         var customers = await _customerService.GetAllAsync();
@@ -165,4 +176,16 @@ public partial class CustomerViewModel : ViewModelBase
         IsEditMode = false;
         SelectedCustomer = null;
     }
+    private static List<ExportColumn<Customer>> CustomerColumns()
+    {
+        return new List<ExportColumn<Customer>>
+    {
+        new("Ad", x => x.Name),
+        new("Soyad / Firma", x => x.SurnameCompany),
+        new("Telefon", x => x.Phone),
+        new("Email", x => x.Email),
+        new("Adres", x => x.Address)
+    };
+    }
+
 }

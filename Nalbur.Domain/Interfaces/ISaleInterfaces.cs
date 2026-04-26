@@ -9,6 +9,9 @@ public interface ISaleService
     Task<List<Sale>> GetFilteredSalesAsync(DateTime? startDate, DateTime? endDate, int? customerId, SaleType? saleType);
     Task<Sale?> GetSaleByIdAsync(int id);
     Task<Sale> ProcessSaleAsync(Sale sale, InstallmentPlan? plan);
+    Task ReturnSaleAsync(int saleId, string? note = null);
+
+    Task DeleteSaleAsync(int saleId, bool restoreStock = true);
 }
 
 public interface IInstallmentService

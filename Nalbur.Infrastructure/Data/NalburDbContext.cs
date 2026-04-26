@@ -18,6 +18,7 @@ public class NalburDbContext : DbContext
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<User> Users => Set<User>();
     public DbSet<OutgoingPayment> OutgoingPayments => Set<OutgoingPayment>();
+    public DbSet<WorkContract> WorkContracts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

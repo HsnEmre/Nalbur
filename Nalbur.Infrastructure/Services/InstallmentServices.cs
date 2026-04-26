@@ -36,11 +36,14 @@ public class InstallmentService : IInstallmentService
             .ToListAsync();
     }
 
+
     public async Task<List<Installment>> GetActiveInstallmentsAsync()
     {
-        // En az 1 tane ödenmemiþ taksiti olan planlarý bul
         var activePlanIds = await _context.Installments
-            .Where(i => i.Status != InstallmentStatus.Paid)
+            .Where(i =>
+                i.Status != InstallmentStatus.Paid &&
+                i.Status != InstallmentStatus.Cancelled &&
+                !i.InstallmentPlan.Sale.IsReturned)
             .Select(i => i.InstallmentPlanId)
             .Distinct()
             .ToListAsync();
@@ -48,23 +51,52 @@ public class InstallmentService : IInstallmentService
         if (!activePlanIds.Any())
             return new List<Installment>();
 
-        // Bu aktif planlara ait tüm taksitleri getir
-        // Paid olanlarý da getiriyoruz ki geçmiþ ödeme/taksit durumu tabloda görünsün
         return await _context.Installments
             .Include(i => i.InstallmentPlan)
                 .ThenInclude(ip => ip.Sale)
                     .ThenInclude(s => s.Customer)
-
             .Include(i => i.InstallmentPlan)
                 .ThenInclude(ip => ip.Sale)
                     .ThenInclude(s => s.SaleItems)
                         .ThenInclude(si => si.Product)
-
             .Where(i => activePlanIds.Contains(i.InstallmentPlanId))
             .OrderBy(i => i.InstallmentPlanId)
             .ThenBy(i => i.DueDate)
             .ToListAsync();
     }
+
+
+    #region getActiveInstallment v1
+    //public async Task<List<Installment>> GetActiveInstallmentsAsync()
+    //{
+    //    // En az 1 tane ödenmemiþ taksiti olan planlarý bul
+    //    var activePlanIds = await _context.Installments
+    //        .Where(i => i.Status != InstallmentStatus.Paid)
+    //        .Select(i => i.InstallmentPlanId)
+    //        .Distinct()
+    //        .ToListAsync();
+
+    //    if (!activePlanIds.Any())
+    //        return new List<Installment>();
+
+    //    // Bu aktif planlara ait tüm taksitleri getir
+    //    // Paid olanlarý da getiriyoruz ki geçmiþ ödeme/taksit durumu tabloda görünsün
+    //    return await _context.Installments
+    //        .Include(i => i.InstallmentPlan)
+    //            .ThenInclude(ip => ip.Sale)
+    //                .ThenInclude(s => s.Customer)
+
+    //        .Include(i => i.InstallmentPlan)
+    //            .ThenInclude(ip => ip.Sale)
+    //                .ThenInclude(s => s.SaleItems)
+    //                    .ThenInclude(si => si.Product)
+
+    //        .Where(i => activePlanIds.Contains(i.InstallmentPlanId))
+    //        .OrderBy(i => i.InstallmentPlanId)
+    //        .ThenBy(i => i.DueDate)
+    //        .ToListAsync();
+    //} 
+    #endregion
 
     public async Task<List<Installment>> GetInstallmentsByCustomerAsync(int customerId)
     {

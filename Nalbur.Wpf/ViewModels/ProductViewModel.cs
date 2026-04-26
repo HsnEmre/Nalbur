@@ -27,6 +27,25 @@ public partial class ProductViewModel : ViewModelBase
         }
     }
 
+    public IRelayCommand ExportExcelCommand { get; }
+    public IRelayCommand ExportWordCommand { get; }
+    public IRelayCommand ExportPdfCommand { get; }
+
+    public List<string> UnitOptions { get; } = new()
+{
+    "Adet",
+    "Kg",
+    "Gram",
+    "Litre",
+    "Metrekare",
+    "Metre",
+    "Paket",
+    "Kutu",
+    "Çuval",
+    "Teneke",
+    "Rulo"
+};
+
     [ObservableProperty]
     private Product? _selectedProduct;
 
@@ -51,6 +70,7 @@ public partial class ProductViewModel : ViewModelBase
                 SalePrice = value.SalePrice,
                 CurrentStock = value.CurrentStock,
                 MinimumStock = value.MinimumStock,
+                StockUnit = string.IsNullOrWhiteSpace(value.StockUnit) ? "Adet" : value.StockUnit,
                 IsActive = value.IsActive
             };
 
@@ -70,14 +90,43 @@ public partial class ProductViewModel : ViewModelBase
         SaveProductCommand = new AsyncRelayCommand(SaveProductAsync);
         DeleteProductCommand = new AsyncRelayCommand(DeleteProductAsync);
         ClearFormCommand = new RelayCommand(ClearForm);
+        ExportExcelCommand = new RelayCommand(() =>
+    ExportHelper.ExportToExcel("Ürün Listesi", Products, ProductColumns()));
+
+        ExportWordCommand = new RelayCommand(() =>
+            ExportHelper.ExportToWord("Ürün Listesi", Products, ProductColumns()));
+
+        ExportPdfCommand = new RelayCommand(() =>
+            ExportHelper.ExportToPdf("Ürün Listesi", Products, ProductColumns()));
 
         LoadProductsCommand.Execute(null);
     }
+
 
     public IAsyncRelayCommand LoadProductsCommand { get; }
     public IAsyncRelayCommand SaveProductCommand { get; }
     public IAsyncRelayCommand DeleteProductCommand { get; }
     public IRelayCommand ClearFormCommand { get; }
+
+
+
+    private static List<ExportColumn<Product>> ProductColumns()
+    {
+        return new List<ExportColumn<Product>>
+    {
+        new("Kod", x => x.Code),
+        new("Barkod", x => x.Barcode),
+        new("Ürün Adý", x => x.Name),
+        new("Kategori", x => x.Category),
+        new("Stok", x => x.CurrentStock),
+        new("Birim", x => x.StockUnit),
+        new("Minimum Stok", x => x.MinimumStock),
+        new("Alýþ Fiyatý", x => x.CostPrice),
+        new("Satýþ Fiyatý", x => x.SalePrice),
+        new("Aktif", x => x.IsActive)
+    };
+    }
+
 
     private async Task LoadProductsAsync()
     {
@@ -144,7 +193,12 @@ public partial class ProductViewModel : ViewModelBase
 
     private void ClearForm()
     {
-        NewProduct = new Product();
+        NewProduct = new Product
+        {
+            StockUnit = "Adet",
+            IsActive = true
+        };
+
         IsEditMode = false;
         SelectedProduct = null;
     }

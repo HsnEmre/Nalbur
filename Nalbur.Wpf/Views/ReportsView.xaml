@@ -1,0 +1,227 @@
+﻿<UserControl x:Class="Nalbur.Wpf.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="700"
+             d:DesignWidth="1100">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Filters + Export -->
+        <materialDesign:Card Grid.Row="0" Margin="0,0,0,16" Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <DatePicker SelectedDate="{Binding StartDate}"
+                                materialDesign:HintAssist.Hint="Başlangıç"
+                                Width="150"
+                                Margin="0,0,16,0"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+
+                    <DatePicker SelectedDate="{Binding EndDate}"
+                                materialDesign:HintAssist.Hint="Bitiş"
+                                Width="150"
+                                Margin="0,0,16,0"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+
+                    <Button Command="{Binding LoadReportCommand}"
+                            Content="RAPORLA"
+                            VerticalAlignment="Bottom" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="16,0,0,0">
+
+                    <Button Command="{Binding ExportExcelCommand}"
+                            Content="EXCEL"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0" />
+
+                    <Button Command="{Binding ExportWordCommand}"
+                            Content="WORD"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0" />
+
+                    <Button Command="{Binding ExportPdfCommand}"
+                            Content="PDF"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Summary Cards -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <materialDesign:Card Grid.Column="0" Margin="0,0,8,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Toplam Gelir" FontSize="13" Opacity="0.75" />
+                    <TextBlock Text="{Binding TotalIncome, StringFormat=C2}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="Green" />
+                    <TextBlock Text="{Binding SalesCount, StringFormat='Satış Sayısı: {0}'}"
+                               FontSize="12"
+                               Opacity="0.75" />
+                </StackPanel>
+            </materialDesign:Card>
+
+            <materialDesign:Card Grid.Column="1" Margin="8,0,8,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Toplam Gider" FontSize="13" Opacity="0.75" />
+                    <TextBlock Text="{Binding TotalExpense, StringFormat=C2}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="Red" />
+                    <TextBlock Text="{Binding ExpenseCount, StringFormat='Gider Kaydı: {0}'}"
+                               FontSize="12"
+                               Opacity="0.75" />
+                </StackPanel>
+            </materialDesign:Card>
+
+            <materialDesign:Card Grid.Column="2" Margin="8,0,8,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Net Durum" FontSize="13" Opacity="0.75" />
+                    <TextBlock Text="{Binding NetTotal, StringFormat=C2}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                    <TextBlock Text="Gelir - Ödenmiş Gider"
+                               FontSize="12"
+                               Opacity="0.75" />
+                </StackPanel>
+            </materialDesign:Card>
+
+            <materialDesign:Card Grid.Column="3" Margin="8,0,0,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="İade Edilen Satış" FontSize="13" Opacity="0.75" />
+                    <TextBlock Text="{Binding ReturnedSalesTotal, StringFormat=C2}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="OrangeRed" />
+                    <TextBlock Text="Gelire dahil edilmez"
+                               FontSize="12"
+                               Opacity="0.75" />
+                </StackPanel>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- Details -->
+        <materialDesign:Card Grid.Row="2" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Text="Gelir / Gider Detayları"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,16" />
+
+                <Grid Grid.Row="1" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Nakit Satış" Opacity="0.7" />
+                        <TextBlock Text="{Binding CashSalesTotal, StringFormat=C2}" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Kart Satış" Opacity="0.7" />
+                        <TextBlock Text="{Binding CardSalesTotal, StringFormat=C2}" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Taksitli Satış" Opacity="0.7" />
+                        <TextBlock Text="{Binding InstallmentSalesTotal, StringFormat=C2}" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3">
+                        <TextBlock Text="Ödenmiş Gider" Opacity="0.7" />
+                        <TextBlock Text="{Binding PaidExpenseTotal, StringFormat=C2}" FontWeight="Bold" Foreground="Red" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Bekleyen Gider" Opacity="0.7" />
+                        <TextBlock Text="{Binding PendingExpenseTotal, StringFormat=C2}" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="5">
+                        <TextBlock Text="Geciken Gider" Opacity="0.7" />
+                        <TextBlock Text="{Binding OverdueExpenseTotal, StringFormat=C2}" FontWeight="Bold" Foreground="OrangeRed" />
+                    </StackPanel>
+                </Grid>
+
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding ReportLines}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tarih"
+                                            Binding="{Binding Date, StringFormat=dd.MM.yyyy HH:mm}"
+                                            Width="130" />
+
+                        <DataGridTextColumn Header="Tip"
+                                            Binding="{Binding Type}"
+                                            Width="80" />
+
+                        <DataGridTextColumn Header="Kaynak"
+                                            Binding="{Binding Source}"
+                                            Width="120" />
+
+                        <DataGridTextColumn Header="Açıklama"
+                                            Binding="{Binding Description}"
+                                            Width="*" />
+
+                        <DataGridTextColumn Header="Gelir"
+                                            Binding="{Binding Income, StringFormat=C2}"
+                                            Width="110" />
+
+                        <DataGridTextColumn Header="Gider"
+                                            Binding="{Binding Expense, StringFormat=C2}"
+                                            Width="110" />
+
+                        <DataGridTextColumn Header="Bakiye"
+                                            Binding="{Binding Balance, StringFormat=C2}"
+                                            Width="110" />
+
+                        <DataGridTextColumn Header="Durum"
+                                            Binding="{Binding Status}"
+                                            Width="100" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

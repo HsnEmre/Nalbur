@@ -34,6 +34,12 @@
         <DataTemplate DataType="{x:Type viewmodels:OutgoingPaymentsViewModel}">
             <views:OutgoingPaymentsView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:WorkContractViewModel}">
+            <views:WorkContractView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:ReportsViewModel}">
+            <views:ReportsView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -95,6 +101,36 @@
                         <TextBlock Text="Ödeme/Gider Takip" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
+
+
+                <Button Command="{Binding NavigateToContractsCommand}"
+        Foreground="White"
+        HorizontalContentAlignment="Left"
+        Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileDocumentEdit"
+                                 Width="24"
+                                 Height="24"
+                                 Margin="0,0,10,0" />
+                        <TextBlock Text="Sözleşmeler"
+                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding NavigateToReportsCommand}"
+        Foreground="White"
+        HorizontalContentAlignment="Left"
+        Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ChartBox"
+                                 Width="24"
+                                 Height="24"
+                                 Margin="0,0,10,0" />
+                        <TextBlock Text="Raporlar"
+                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
             </StackPanel>
         </Border>
 
