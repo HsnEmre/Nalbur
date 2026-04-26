@@ -1,42 +1,99 @@
-# Nalbur - Small Business Management System
+# Nalbur Management System
 
-A production-oriented .NET 8 WPF application for managing stock, customers, sales, and installments.
+TR: WPF + MVVM mimarisi ile geliştirilmiş modern bir nalbur yönetim uygulaması.  
+EN: A modern hardware store management application built with WPF + MVVM architecture.
 
-## Key Features
-- **Dashboard**: Overview of low stock and overdue installments.
-- **Product Management**: CRUD for products with stock tracking.
-- **Customer Management**: Detailed customer records.
-- **Sales Transaction**: POS-style interface supporting Cash, Card, and Installment sales.
-- **Installment Tracking**: Reminder system for upcoming and past-due payments.
-- **Data Persistence**: EF Core with SQL Server.
+---
 
-## How to Run
+## Özellikler / Features
 
-### Prerequisites
-- **.NET 8 SDK**
-- **SQL Server LocalDB** (Default connection: `(localdb)\MSSQLLocalDB`)
+### TR
+- Dashboard ile kritik verileri görüntüleme
+- Ürün ve stok yönetimi
+- Müşteri yönetimi
+- Nakit, kart ve taksitli satış
+- Taksit takibi ve ödeme alma
+- Satış geçmişi filtreleme
+- Firma gider / ödeme takibi
 
-### Steps
-1. Clone the repository.
-2. Open a terminal in the solution root.
-3. Run the following command to ensure the database and seed data are initialized:
-   ```bash
-   dotnet run --project Nalbur.Wpf
-   ```
-   *Note: On first run, the `DataSeeder` will automatically apply migrations and create sample data.*
+### EN
+- View critical data on the dashboard
+- Product and stock management
+- Customer management
+- Cash, card, and installment sales
+- Installment tracking and payment processing
+- Sales history filtering
+- Company expense / outgoing payment tracking
 
-### Default Credentials
-- **Username**: `admin`
-- **Password**: `admin`
-- *Note: Login screen is not fully enforced in this MVP, but base entities exist for it.*
+---
 
-## Architecture
-- **Layered Architecture**: Separation of Domain, Infrastructure, and UI.
-- **MVVM Pattern**: Using `CommunityToolkit.Mvvm`.
-- **Dependency Injection**: Microsoft Hosting for service management.
-- **Modern UI**: Styled with `MaterialDesignInXamlToolkit`.
+## Kullanılan Teknolojiler / Technologies
 
-## Future Improvements
-- Barcode scanner integration (Product lookup).
-- Receipt printer support (using `System.Printing`).
-- Advanced reporting with charts (OxyPlot or LiveCharts).
+- .NET
+- WPF
+- MVVM
+- CommunityToolkit.Mvvm
+- Entity Framework Core
+- SQL Server
+- Material Design in XAML
+
+---
+
+## Proje Yapısı / Project Structure
+
+```text
+Nalbur.Domain
+Nalbur.Infrastructure
+Nalbur.Wpf
+NalburSetupProject
+TR
+Nalbur.Domain → Entity ve interface katmanı
+Nalbur.Infrastructure → Veri erişimi ve servis katmanı
+Nalbur.Wpf → Arayüz ve ViewModel katmanı
+NalburSetupProject → Kurulum paketi projesi
+EN
+Nalbur.Domain → Entity and interface layer
+Nalbur.Infrastructure → Data access and service layer
+Nalbur.Wpf → UI and ViewModel layer
+NalburSetupProject → Installer package project
+Kurulum / Setup
+TR
+script.sql dosyası ile veritabanını oluşturun.
+appsettings.json içinde connection string ayarlayın.
+Nalbur.Wpf projesini çalıştırın.
+EN
+Create the database using script.sql.
+Configure the connection string in appsettings.json.
+Run the Nalbur.Wpf project.
+
+Publish / Setup
+TR
+
+Uygulama farklı bilgisayarlara kurulabilecek şekilde publish ve setup project desteğine sahiptir.
+
+EN
+
+The application supports publish and setup project workflows for installation on different computers.
+
+Önerilen publish ayarları / Recommended publish settings:
+
+Target: Folder
+Configuration: Release
+Deployment Mode: Self-contained
+Target Runtime: win-x64
+
+Not / Note
+TR
+
+Uygulamanın düzgün çalışması için hedef bilgisayarda veritabanı bağlantısının doğru yapılandırılması gerekir.
+
+EN
+
+For the application to work properly, the database connection must be correctly configured on the target machine.
+TR
+
+Bu proje özel / kurum içi kullanım amacıyla geliştirilmiştir.
+
+EN
+
+This project was developed for private / internal use.
